@@ -1,0 +1,91 @@
+{
+  "grid_size": 107,
+  "concurrency": 8,
+  "scaling": [
+    {
+      "images": 1,
+      "mutations": 107,
+      "seconds": 3.46,
+      "per_second": 31.0,
+      "failures": 0,
+      "p50_ms": 228.4,
+      "p95_ms": 533.0,
+      "max_ms": 1149.3
+    },
+    {
+      "images": 5,
+      "mutations": 535,
+      "seconds": 21.08,
+      "per_second": 25.4,
+      "failures": 0,
+      "p50_ms": 270.1,
+      "p95_ms": 690.1,
+      "max_ms": 1649.8
+    },
+    {
+      "images": 10,
+      "mutations": 1070,
+      "seconds": 32.49,
+      "per_second": 32.9,
+      "failures": 0,
+      "p50_ms": 214.2,
+      "p95_ms": 560.3,
+      "max_ms": 1158.3
+    },
+    {
+      "images": 20,
+      "mutations": 2140,
+      "seconds": 66.04,
+      "per_second": 32.4,
+      "failures": 0,
+      "p50_ms": 213.9,
+      "p95_ms": 566.0,
+      "max_ms": 1213.0
+    },
+    {
+      "images": 40,
+      "mutations": 4280,
+      "seconds": 139.35,
+      "per_second": 30.7,
+      "failures": 0,
+      "p50_ms": 226.3,
+      "p95_ms": 584.8,
+      "max_ms": 2084.8
+    }
+  ],
+  "median_ms_by_filter": {
+    "annotate": 649.7,
+    "black_threshold": 131.2,
+    "blur": 193.4,
+    "border": 127.7,
+    "brightness": 141.4,
+    "charcoal": 501.6,
+    "chop": 126.8,
+    "color_reduce": 298.1,
+    "colorize": 149.9,
+    "colors": 597.8,
+    "colorspace": 173.9,
+    "contrast": 159.2,
+    "edge": 196.1,
+    "emboss": 265.2,
+    "flip": 129.0,
+    "flop": 123.5,
+    "gamma": 115.9,
+    "gaussian_blur": 301.2,
+    "grayscale": 117.9,
+    "implode": 211.2,
+    "median": 297.5,
+    "monochrome": 632.6,
+    "negate": 116.8,
+    "normalize": 180.6,
+    "paint": 191.8,
+    "posterize": 528.7,
+    "profile": 292.5,
+    "raise": 108.8,
+    "rotate": 110.3,
+    "rotation": 96.9,
+    "rotational_blur": 960.0,
+    "saturation": 131.6
+  },
+  "imagemagick": "ImageMagick 7.1.1-41 Q16-HDRI x86_64 d7d490223:20241115 https://imagemagick.org"
+}

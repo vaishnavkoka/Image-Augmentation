@@ -1,0 +1,5 @@
+# The dependency list lives at the project root, where anyone unpacking the
+# archive will look for it. This file forwards to it so an existing
+#   pip install -r backend/requirements.txt
+# keeps working.
+-r ../requirements.txt

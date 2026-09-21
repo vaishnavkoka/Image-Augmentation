@@ -1,0 +1,320 @@
+{
+  "baseline": 1.0,
+  "rows": [
+    {
+      "family": "compression / palette",
+      "mutation": "colors",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {
+        "colors": 192
+      }
+    },
+    {
+      "family": "compression / palette",
+      "mutation": "posterize",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {
+        "levels": 6
+      }
+    },
+    {
+      "family": "compression / palette",
+      "mutation": "ordered_dither",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {
+        "threshold_map": "o4x4"
+      }
+    },
+    {
+      "family": "blur",
+      "mutation": "blur",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {
+        "sigma": 15.02
+      }
+    },
+    {
+      "family": "blur",
+      "mutation": "gaussian_blur",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {
+        "radius": 15
+      }
+    },
+    {
+      "family": "blur",
+      "mutation": "motion_blur",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {
+        "sigma": 19.0
+      }
+    },
+    {
+      "family": "blur",
+      "mutation": "selective_blur",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {
+        "sigma": 11.38
+      }
+    },
+    {
+      "family": "blur",
+      "mutation": "adaptive_blur",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {
+        "sigma": 11.38
+      }
+    },
+    {
+      "family": "sharpen",
+      "mutation": "sharpen",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {
+        "sigma": 7.62
+      }
+    },
+    {
+      "family": "sharpen",
+      "mutation": "unsharp",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {
+        "sigma": 7.62
+      }
+    },
+    {
+      "family": "sharpen",
+      "mutation": "adaptive_sharpen",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {
+        "sigma": 11.38
+      }
+    },
+    {
+      "family": "geometry",
+      "mutation": "rotate",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {
+        "degrees": 270
+      }
+    },
+    {
+      "family": "geometry",
+      "mutation": "resize",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {
+        "percentage": 156
+      }
+    },
+    {
+      "family": "geometry",
+      "mutation": "shear",
+      "accuracy": 0.5125,
+      "drop": 0.48750000000000004,
+      "params": {
+        "degrees": 22.5
+      }
+    },
+    {
+      "family": "geometry",
+      "mutation": "roll",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {
+        "pixels": 150
+      }
+    },
+    {
+      "family": "geometry",
+      "mutation": "transpose",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {}
+    },
+    {
+      "family": "tone / contrast",
+      "mutation": "gamma",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {
+        "gamma": 3.88
+      }
+    },
+    {
+      "family": "tone / contrast",
+      "mutation": "equalize",
+      "accuracy": 0.8,
+      "drop": 0.19999999999999996,
+      "params": {}
+    },
+    {
+      "family": "tone / contrast",
+      "mutation": "auto_level",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {}
+    },
+    {
+      "family": "tone / contrast",
+      "mutation": "sigmoidal_contrast",
+      "accuracy": 0.775,
+      "drop": 0.22499999999999998,
+      "params": {
+        "strength": 15.12
+      }
+    },
+    {
+      "family": "tone / contrast",
+      "mutation": "brightness_contrast",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {
+        "amount": 25
+      }
+    },
+    {
+      "family": "tone / contrast",
+      "mutation": "modulate",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {
+        "brightness": 155
+      }
+    },
+    {
+      "family": "colour space",
+      "mutation": "grayscale",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {
+        "method": "Rec709Luma"
+      }
+    },
+    {
+      "family": "colour space",
+      "mutation": "colorspace",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {
+        "colorspace": "sRGB"
+      }
+    },
+    {
+      "family": "colour space",
+      "mutation": "profile",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {
+        "profile": "Strip"
+      }
+    },
+    {
+      "family": "noise / denoise",
+      "mutation": "despeckle",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {}
+    },
+    {
+      "family": "noise / denoise",
+      "mutation": "enhance",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {}
+    },
+    {
+      "family": "noise / denoise",
+      "mutation": "wavelet_denoise",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {
+        "threshold": 23
+      }
+    },
+    {
+      "family": "noise / denoise",
+      "mutation": "kuwahara",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {
+        "radius": 8
+      }
+    },
+    {
+      "family": "noise / denoise",
+      "mutation": "median",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {
+        "kernel": 8
+      }
+    },
+    {
+      "family": "stylise",
+      "mutation": "emboss",
+      "accuracy": 0.5375,
+      "drop": 0.4625,
+      "params": {
+        "radius": 3.88
+      }
+    },
+    {
+      "family": "stylise",
+      "mutation": "charcoal",
+      "accuracy": 0.3125,
+      "drop": 0.6875,
+      "params": {
+        "radius": 7.55
+      }
+    },
+    {
+      "family": "stylise",
+      "mutation": "paint",
+      "accuracy": 0.5,
+      "drop": 0.5,
+      "params": {
+        "radius": 8
+      }
+    },
+    {
+      "family": "stylise",
+      "mutation": "solarize",
+      "accuracy": 0.9375,
+      "drop": 0.0625,
+      "params": {
+        "threshold": 75
+      }
+    },
+    {
+      "family": "stylise",
+      "mutation": "sepia_tone",
+      "accuracy": 0.9875,
+      "drop": 0.012499999999999956,
+      "params": {
+        "threshold": 75
+      }
+    },
+    {
+      "family": "stylise",
+      "mutation": "vignette",
+      "accuracy": 1.0,
+      "drop": 0.0,
+      "params": {
+        "sigma": 30.25
+      }
+    }
+  ],
+  "skipped_as_noop": []
+}

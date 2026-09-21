@@ -1,0 +1,34 @@
+# Generated corpora. The tool is byte-reproducible, so these regenerate exactly
+# from the same inputs and parameters rather than being distributed.
+outputs/*
+!outputs/.gitkeep
+uploads/*
+!uploads/.gitkeep
+
+# Built by setup.sh on each machine
+src/backend/venv/
+src/backend/venv312/
+__pycache__/
+*.pyc
+
+# Machine-specific: carries this host's MAGICK_HOME and DEBUG setting.
+# configs/.env.example is the template that ships instead.
+src/backend/.env
+.env
+
+# Built by scripts/package.sh
+dist/
+
+# Local safety net, not part of the product
+scripts/restore-points/
+
+# Credentials must never be committed to a public repository
+*token*
+*.secret
+*.pem
+*.key
+
+# Editor and OS noise
+.vscode/
+.idea/
+.DS_Store
