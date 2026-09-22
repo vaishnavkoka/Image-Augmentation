@@ -45,7 +45,7 @@ echo "=============================================================="
 $PY edge_cases.py || fail=1
 echo
 echo "=============================================================="
-echo " 7. Sub-options — all 31 colorspaces, 9 grayscale, 50 profiles"
+echo " 7. Sub-options — every colorspace, grayscale method, profile, dither"
 echo "=============================================================="
 $PY oracle_suboptions.py || fail=1
 echo
@@ -60,7 +60,7 @@ echo "=============================================================="
 $PY ui_wiring.py || fail=1
 echo
 echo "=============================================================="
-echo " 10. Augmentation grid — all 160 configurations, end to end"
+echo " 10. Augmentation grid — every configuration, end to end"
 echo "=============================================================="
 $PY augmentation_grid.py || fail=1
 echo

@@ -11,7 +11,7 @@ Running it also showed that the count and the yield are not the same number.
 Several sliders default to a value that is the identity -- median's kernel of 1,
 `colors` at 256, gamma 1.0 -- so at default positions those configurations return
 the input image. That is worth reporting next to the headline figure rather than
-hiding: the grid is 160 configurations, of which a smaller number are distinct
+hiding: the grid is N configurations, of which a smaller number are distinct
 images at default settings.
 """
 import hashlib
