@@ -878,19 +878,26 @@ def create_app():
             
             width, height = img.size
             
+            # The catalogue allows up to 200 pixels, which is more than half of
+            # a small image. Unclamped, crop((200, 0, 40, 240)) puts the right
+            # edge left of the left edge and PIL raises "Coordinate 'right' is
+            # less than 'left'" -- a 400 on the fallback path for a request the
+            # ImageMagick path completes. Leave at least one pixel on each axis.
+            def _clamp(n, extent):
+                return max(0, min(int(n), (extent - 1) // 2))
+
             if chop_type == 'horizontal':
                 # Remove from left and right
-                return img.crop((pixels, 0, width - pixels, height))
+                px = _clamp(pixels, width)
+                return img.crop((px, 0, width - px, height))
             elif chop_type == 'vertical':
                 # Remove from top and bottom
-                return img.crop((0, pixels, width, height - pixels))
+                py = _clamp(pixels, height)
+                return img.crop((0, py, width, height - py))
             elif chop_type == 'center':
                 # Crop from center
-                left = pixels
-                top = pixels
-                right = width - pixels
-                bottom = height - pixels
-                return img.crop((left, top, right, bottom))
+                px, py = _clamp(pixels, width), _clamp(pixels, height)
+                return img.crop((px, py, width - px, height - py))
             else:
                 return img
         

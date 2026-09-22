@@ -96,8 +96,28 @@ def main():
                 failures.append(f'{value}: {mut}.{par}={send} gave an unreadable reply')
                 continue
             if 'result_url' not in got:
-                failures.append(f'{value}: the slider can send {par}={send}, '
-                                f'which the backend rejects ({got.get("error", "?")[:60]})')
+                err = str(got.get('error', '?'))
+                # Two different things look alike here. An operator that this
+                # ImageMagick cannot perform at all is a fact about the build --
+                # build_matrix.py reports those, and on a stock ImageMagick there
+                # are dozens. A slider that can send a value the operator itself
+                # refuses is a wiring defect, which is what this suite is for.
+                # Conflating them made CI fail on a runner whose ImageMagick is
+                # simply older, which says nothing about the interface.
+                unavailable = ('is not supported' in err
+                               or 'requires ImageMagick version' in err
+                               or 'no decode delegate' in err
+                               # the worker-pool message for an operator that
+                               # crashes its process on this build: contained,
+                               # and build_matrix.py is what reports it
+                               or 'could not run here' in err)
+                if unavailable:
+                    notes.append(f'{value}: {mut} is unavailable on this '
+                                 f'ImageMagick build, so its bounds could not be '
+                                 f'probed')
+                else:
+                    failures.append(f'{value}: the slider can send {par}={send}, '
+                                    f'which the backend rejects ({err[:60]})')
             declared = p.get(which)
             if declared is not None:
                 out = raw < float(declared) if which == 'min' else raw > float(declared)
