@@ -6,7 +6,7 @@
 [![Configurations](https://img.shields.io/badge/Configurations%20per%20image-173-364FC7?style=flat-square)](#what-it-does)
 [![CLI parity](https://img.shields.io/badge/Pixel--identical%20to%20CLI-68%2F69-2EA44F?style=flat-square)](#validation)
 [![Reproducible](https://img.shields.io/badge/Output-byte--reproducible-2EA44F?style=flat-square)](#what-it-does)
-[![Suites](https://img.shields.io/badge/Validation%20suites-13-9C36B5?style=flat-square)](#validation)
+[![Suites](https://img.shields.io/badge/Validation%20suites-14-9C36B5?style=flat-square)](#validation)
 [![Provenance](https://img.shields.io/badge/Provenance%20accuracy-100%25%20%E2%86%92%2050%25-C92A2A?style=flat-square)](#key-findings)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![ImageMagick](https://img.shields.io/badge/ImageMagick-7.1.1--41%20Q16--HDRI-EE7600?style=flat-square)](https://imagemagick.org/)
@@ -46,7 +46,7 @@ to cite either:
 | Verified against | the ImageMagick command line — **68 of 69 pixel-identical**, 1 within one quantum |
 | Output | byte-reproducible across runs |
 | Interface | three modes (Beginner, Intermediate, Advanced) |
-| Validation | **13 test suites**, one command |
+| Validation | **14 test suites**, one command |
 
 ## Operators
 
@@ -87,6 +87,37 @@ catalogue's default parameter before being accepted:
 `GET /api/mutations` returns the full catalogue of all 69 with every parameter's
 range and default. `-spread`, `-sketch` and Wand's `noise` were deliberately excluded: all three
 are random, which would break reproducibility.
+
+## Channel restriction
+
+Any mutation can be restricted to a single colour plane, the way ImageMagick's
+`-channel` setting does:
+
+```bash
+curl -X POST http://localhost:5000/api/mutate \
+  -F 'image=@examples/input/sample.jpg' \
+  -F 'mutation=blur' \
+  -F 'parameters={"sigma":5,"channel":"red"}'
+```
+
+Channels: `all` (default), `red`, `green`, `blue`, `alpha`, `cyan`, `magenta`,
+`yellow`, `black`. In the interface it is a control in Advanced mode.
+
+**40 of the 76 operators honour it**, and the other 36 are refused rather than
+silently widened. That distinction matters: `posterize` quantises all three
+planes whatever the mask says, so a request for "posterize the green channel"
+would otherwise return a whole-image posterize labelled as channel-restricted.
+Support is measured per operator at run time rather than kept in a list, so it
+cannot drift:
+
+```
+'posterize' does not honour a channel restriction: it writes to every
+channel whatever the mask says
+```
+
+Each supported combination is pixel-identical to
+`magick in -channel R <operator> +channel out` — `tests/channel_restriction.py`
+checks both that parity and that the other planes come back untouched.
 
 ## Key findings
 
@@ -290,6 +321,7 @@ Created at runtime and not tracked: `outputs/`, `uploads/`, `src/backend/venv/`,
 | `download_paths` | downloads, batch ZIP, traversal refusal |
 | `ui_behaviour` | theme, numeric entry, upload caps, in a real browser |
 | `build_matrix` | the catalogue on more than one ImageMagick, and that none crashes the server |
+| `channel_restriction` | `-channel` parity with the CLI, and that operators which ignore the mask are refused |
 
 ## Datasets
 

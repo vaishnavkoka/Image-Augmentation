@@ -45,11 +45,18 @@ def run_job(job, app_module):
     from wand.image import Image as WandImage
 
     use_pil = bool(job.get('use_pil'))
-    params = job.get('params') or {}
+    params = dict(job.get('params') or {})
+    # -channel is a setting, not a parameter of the operator, so it travels
+    # separately and never reaches the operator's own keyword arguments.
+    channel = params.pop('channel', None)
     fmt = job.get('format') or 'png'
     quality = int(job.get('jpeg_quality') or 90)
 
     if use_pil:
+        if channel and channel != 'all':
+            raise ValueError(
+                'a channel restriction needs the ImageMagick path, and this '
+                'format is being handled by the Pillow fallback')
         with PILImage.open(job['input_path']) as im:
             im.load()
             mutated = app_module.PIL_MUTATION_FUNC(im, job['mutation'], **params)
@@ -68,8 +75,18 @@ def run_job(job, app_module):
         return {'ok': False, 'kind': 'client',
                 'error': f"Unknown mutation: {job.get('mutation')}"}
 
+    if channel and channel != 'all':
+        # Measured, not assumed: some operators ignore the mask and would hand
+        # back a whole-image mutation labelled as channel-restricted.
+        if not app_module.honours_channel(job['resolved'], func, params):
+            return {'ok': False, 'kind': 'client',
+                    'error': f"'{job.get('mutation')}' does not honour a channel "
+                             f"restriction: it writes to every channel whatever "
+                             f"the mask says"}
+
     with WandImage(filename=job['input_path']) as im:
-        mutated = app_module.apply_to_every_frame(im, func, **params)
+        with app_module.channel_mask(im, channel):
+            mutated = app_module.apply_to_every_frame(im, func, **params)
         if not mutated.format or mutated.format.lower() != fmt:
             try:
                 mutated.format = fmt

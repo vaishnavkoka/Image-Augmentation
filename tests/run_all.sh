@@ -79,5 +79,10 @@ echo " 13. Build matrix — the catalogue on more than one ImageMagick"
 echo "=============================================================="
 $PY build_matrix.py || fail=1
 echo
+echo "=============================================================="
+echo " 14. Channel restriction — -channel, and refusing to fake it"
+echo "=============================================================="
+$PY channel_restriction.py || fail=1
+echo
 [ $fail -eq 0 ] && echo "ALL SUITES PASSED" || echo "SOME SUITES FAILED"
 exit $fail

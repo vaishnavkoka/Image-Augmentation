@@ -15,7 +15,7 @@
             }
         } catch (e) { /* no stored preference available; fall through to CSS */ }
     </script>
-    <title>Advanced Image Mutation Tool v1.3 &mdash; ImageMagick Filters</title>
+    <title>Advanced Image Mutation Tool v1.4 &mdash; ImageMagick Filters</title>
     <style>
         /* ============================================================
            THEME TOKENS
@@ -1648,7 +1648,7 @@
                     <circle cx="8.5" cy="8.5" r="1.6"/>
                     <path d="M21 15l-5-5L5 21"/>
                 </svg>
-                Advanced Image Mutation Tool<span class="version">v1.3</span>
+                Advanced Image Mutation Tool<span class="version">v1.4</span>
             </h1>
             <p>Continuous &amp; Discrete Controls</p>
             <div class="mode-bar">
@@ -1720,6 +1720,40 @@
 
                 <!-- CONTINUOUS FILTERS TAB -->
                 <div id="continuous" class="filter-tab active">
+                    <!-- -channel is a setting, not a filter: it restricts which
+                         colour plane the chosen filter may write. Advanced only,
+                         and the backend refuses it for operators that ignore the
+                         mask rather than quietly widening the request. -->
+                    <div class="filter-group" id="channelGroup" style="margin-bottom: 15px;">
+                        <h3 style="margin-bottom: 12px;">Channel</h3>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="chanAll" name="channel-select" value="all" checked>
+                                <label for="chanAll">All</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="chanRed" name="channel-select" value="red">
+                                <label for="chanRed">Red</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="chanGreen" name="channel-select" value="green">
+                                <label for="chanGreen">Green</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="chanBlue" name="channel-select" value="blue">
+                                <label for="chanBlue">Blue</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="chanAlpha" name="channel-select" value="alpha">
+                                <label for="chanAlpha">Alpha</label>
+                            </div>
+                        </div>
+                        <p class="slider-hint">Restricts the filter to one colour plane, as
+                           <code>-channel R … +channel</code> does. Some operators write to
+                           every plane whatever the mask says, and those are refused rather
+                           than silently widened.</p>
+                    </div>
+
                     <div class="filter-group" style="margin-bottom: 15px;">
                         <h3 style="margin-bottom: 12px;">Select a Continuous Filter</h3>
                         <div class="radio-group">
@@ -3806,6 +3840,13 @@
                 mutation = settings.mutation;
                 params = {};
                 params[settings.param] = settings.value;
+                // -channel travels with the request but is not a parameter of
+                // the operator; the backend validates and applies it.
+                const chan = document.querySelector('input[name="channel-select"]:checked');
+                if (chan && chan.value !== 'all') {
+                    params.channel = chan.value;
+                    filterName = `${settings.mutation}_${chan.value}`;
+                }
             } else {
                 const settings = getDiscreteSettings();
                 if (!settings || !settings.type || settings.type === 'none') {
@@ -4755,6 +4796,18 @@
                 const isSelected = key === sel;
                 slider.disabled = !(conf.tune && isSelected);
             });
+            // Channel restriction is an Advanced-mode control: the other two
+            // modes promise "the filter at its default", and a plane mask is
+            // neither a default nor a simple slider.
+            const channelPanel = document.getElementById('channelGroup');
+            if (channelPanel) {
+                channelPanel.hidden = !conf.numeric;
+                if (!conf.numeric) {
+                    const allChan = document.getElementById('chanAll');
+                    if (allChan) allChan.checked = true;
+                }
+            }
+
             numBoxes.forEach(({ key, box, show }) => {
                 box.disabled = !(conf.numeric && conf.tune && key === sel);
                 box.hidden = !conf.numeric;

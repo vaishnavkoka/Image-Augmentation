@@ -3,6 +3,28 @@
 All notable changes to this project are recorded here. Versions follow
 [semantic versioning](https://semver.org/).
 
+## [1.4.0] — 2026-09-22
+
+### Added
+- **Channel restriction.** Any mutation can be limited to one colour plane, as
+  ImageMagick's `-channel` setting does — `{"sigma":5,"channel":"red"}` on the
+  API, a control in Advanced mode in the interface. Implemented through
+  `MagickSetImageChannelMask`, which is the same mechanism the command line
+  uses, so it needed no per-operator plumbing.
+- `tests/channel_restriction.py`, the fourteenth suite: parity with
+  `-channel R … +channel` for each supported operator, that the other planes
+  come back untouched, and that unsupported operators are refused.
+
+### Notes
+- **40 of the 76 operators honour the mask; the other 36 are refused.** The
+  mask is not universal: `posterize` quantises all three planes whatever it
+  says, diverging from `-channel G -posterize 4 +channel` by 250 levels.
+  Accepting such a request would return a whole-image mutation labelled as
+  channel-restricted. Support is therefore measured per operator at run time
+  rather than kept in a list, so it cannot fall out of date.
+- The Pillow fallback has no channel mask, so a channel request on a format
+  being handled by the fallback is refused rather than approximated.
+
 ## [1.3.0] — 2026-09-22
 
 ### Added
@@ -87,5 +109,6 @@ First public release.
   slider positions, so a default augmentation run yields 148 distinct images.
 - `annotate` and `colorize` are reachable only through the API.
 
+[1.4.0]: https://github.com/vaishnavkoka/Image-Augmentation/releases/tag/v1.4.0
 [1.3.0]: https://github.com/vaishnavkoka/Image-Augmentation/releases/tag/v1.3.0
 [1.2.0]: https://github.com/vaishnavkoka/Image-Augmentation/releases/tag/v1.2.0

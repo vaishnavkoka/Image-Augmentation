@@ -4,8 +4,10 @@ Main application entry point with image processing mutations using ImageMagick
 """
 
 import os
+import contextlib
 import json
 import subprocess
+import tempfile
 import functools
 import sys
 import threading
@@ -98,6 +100,10 @@ class _MagickCore:
                 library.MagickProfileImage.argtypes = [ctypes.c_void_p, ctypes.c_char_p,
                                                        ctypes.c_void_p, ctypes.c_size_t]
                 library.MagickProfileImage.restype = ctypes.c_int
+                # -channel is a setting in ImageMagick: it masks which channels
+                # the next operator may write. This is the same entry point.
+                library.MagickSetImageChannelMask.argtypes = [ctypes.c_void_p, ctypes.c_int]
+                library.MagickSetImageChannelMask.restype = ctypes.c_int
                 self.lib = lib
                 break
             except (OSError, AttributeError):
@@ -117,6 +123,14 @@ class _MagickCore:
     @property
     def available(self):
         return self.lib is not None
+
+    @staticmethod
+    def set_channel_mask(wand, bit):
+        """Restrict writes to the given channels. Returns the previous mask."""
+        try:
+            return library.MagickSetImageChannelMask(wand, bit)
+        except Exception:
+            return None
 
     def resolve(self, option_group, name):
         """Name -> ImageMagick enum value, or None if it isn't recognised."""
@@ -243,6 +257,83 @@ STRIP_PROFILES = 'Strip'   # the +profile '*' form: remove every profile
 # Morphology methods worth offering: each is deterministic and each changes
 # the image in a visibly different way. Wand takes them lower-cased.
 MORPHOLOGY_METHODS = ['Dilate', 'Erode', 'Open', 'Close', 'Smooth', 'EdgeIn', 'EdgeOut']
+
+
+# ---- channel restriction ---------------------------------------------------
+# ImageMagick's -channel is a setting, not an operator: it masks which channels
+# the next operator may write. MagickSetImageChannelMask gives the same effect
+# here, which is why this needs no per-operator plumbing.
+#
+# It is not universal, though. Some operators ignore the mask entirely --
+# posterize quantises all three planes whatever the mask says, diverging from
+# `-channel G -posterize 4 +channel` by 250 levels. Honouring a request the
+# operator then ignores would hand back a whole-image mutation labelled as
+# channel-restricted, which is the silent-wrong-result shape this codebase has
+# produced before. So support is measured per operator rather than listed, and
+# a request for an operator that does not honour it is refused.
+CHANNEL_CHOICES = ['all', 'red', 'green', 'blue', 'alpha',
+                   'cyan', 'magenta', 'yellow', 'black']
+
+_CHANNEL_HONOURED = {}          # operator name -> bool, measured once
+
+
+def _channel_bit(name):
+    from wand.image import CHANNELS
+    return CHANNELS[name]
+
+
+@contextlib.contextmanager
+def channel_mask(image, channel):
+    """Restrict writes to one channel for the duration of the block."""
+    if not channel or channel == 'all':
+        yield
+        return
+    previous = MAGICK_CORE.set_channel_mask(image.wand, _channel_bit(channel))
+    try:
+        yield
+    finally:
+        if previous is not None:
+            MAGICK_CORE.set_channel_mask(image.wand, previous)
+
+
+def honours_channel(mutation_name, func, params):
+    """Does this operator actually respect the mask? Measured, not assumed.
+
+    Runs the operator on a small three-colour image with the red channel
+    masked. If green or blue moved, the operator wrote outside the mask and a
+    channel restriction would be a lie.
+    """
+    if mutation_name in _CHANNEL_HONOURED:
+        return _CHANNEL_HONOURED[mutation_name]
+    try:
+        from wand.image import Image as _WandImage
+        import numpy as _np
+        from PIL import Image as _PILImage
+        probe = os.path.join(tempfile.gettempdir(), f'_chanprobe_{os.getpid()}.png')
+        _PILImage.new('RGB', (32, 32)).putdata(
+            [((x * 7) % 256, (y * 11) % 256, ((x + y) * 5) % 256)
+             for y in range(32) for x in range(32)])
+        img = _PILImage.new('RGB', (32, 32))
+        img.putdata([((x * 7) % 256, (y * 11) % 256, ((x + y) * 5) % 256)
+                     for y in range(32) for x in range(32)])
+        img.save(probe)
+        before = _np.asarray(img, int)
+        with _WandImage(filename=probe) as im:
+            with channel_mask(im, 'red'):
+                func(im, **params)
+            im.save(filename=probe)
+        after = _np.asarray(_PILImage.open(probe).convert('RGB'), int)
+        os.unlink(probe)
+        if after.shape != before.shape:
+            ok = False                      # geometry changed: mask is meaningless
+        else:
+            # green and blue must be untouched
+            ok = bool((after[:, :, 1] == before[:, :, 1]).all()
+                      and (after[:, :, 2] == before[:, :, 2]).all())
+    except Exception:
+        ok = False
+    _CHANNEL_HONOURED[mutation_name] = ok
+    return ok
 
 DEFAULT_GRAYSCALE_METHOD = 'Rec709Luma'
 
@@ -437,6 +528,16 @@ def validate_params(mutation_name, params):
     if not isinstance(params, dict):
         raise ValidationError("parameters must be a JSON object")
 
+    # channel applies to any operator, so it is not in any operator's spec.
+    # Validate and set it aside before the per-operator check runs.
+    params = dict(params)
+    channel = params.pop('channel', None)
+    if channel is not None:
+        channel = str(channel).lower()
+        if channel not in CHANNEL_CHOICES:
+            raise ValidationError(
+                f"channel must be one of: {', '.join(CHANNEL_CHOICES)}")
+
     unknown = set(params) - set(spec)
     if unknown:
         allowed = ', '.join(sorted(spec)) or '(none)'
@@ -472,6 +573,8 @@ def validate_params(mutation_name, params):
             clean[key] = str(value).lower() not in ('false', '0', 'no', '')
         elif kind == 'text':
             clean[key] = str(value)[:spec[key][1]]
+    if channel is not None:
+        clean['channel'] = channel
     return clean
 
 
