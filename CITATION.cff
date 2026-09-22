@@ -5,7 +5,7 @@ type: software
 authors:
   - family-names: Koka
     given-names: Vaishnav
-repository-code: "https://github.com/vaishnavkoka/Image-Augmentation"
+repository-code: "https://github.com/vaishnavkoka/Image-Augmentation-tool"
 license: MIT
 version: 1.4.1
 date-released: "2026-09-22"

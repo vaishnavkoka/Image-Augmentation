@@ -1,7 +1,7 @@
 # Image-Augmentation
 
-[![Release](https://img.shields.io/github/v/tag/vaishnavkoka/Image-Augmentation?style=flat-square&label=Release&color=0B7285)](https://github.com/vaishnavkoka/Image-Augmentation/releases)
-[![CI](https://img.shields.io/github/actions/workflow/status/vaishnavkoka/Image-Augmentation/tests.yml?branch=main&style=flat-square&label=CI&logo=githubactions&logoColor=white)](https://github.com/vaishnavkoka/Image-Augmentation/actions/workflows/tests.yml)
+[![Release](https://img.shields.io/github/v/tag/vaishnavkoka/Image-Augmentation-tool?style=flat-square&label=Release&color=0B7285)](https://github.com/vaishnavkoka/Image-Augmentation-tool/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/vaishnavkoka/Image-Augmentation-tool/tests.yml?branch=main&style=flat-square&label=CI&logo=githubactions&logoColor=white)](https://github.com/vaishnavkoka/Image-Augmentation-tool/actions/workflows/tests.yml)
 [![Operators](https://img.shields.io/badge/ImageMagick%20operators-76-4C6EF5?style=flat-square)](#operators)
 [![Configurations](https://img.shields.io/badge/Configurations%20per%20image-173-364FC7?style=flat-square)](#what-it-does)
 [![CLI parity](https://img.shields.io/badge/Pixel--identical%20to%20CLI-68%2F69-2EA44F?style=flat-square)](#validation)

@@ -127,7 +127,7 @@ First public release.
   slider positions, so a default augmentation run yields 148 distinct images.
 - `annotate` and `colorize` are reachable only through the API.
 
-[1.4.1]: https://github.com/vaishnavkoka/Image-Augmentation/releases/tag/v1.4.1
-[1.4.0]: https://github.com/vaishnavkoka/Image-Augmentation/releases/tag/v1.4.0
-[1.3.0]: https://github.com/vaishnavkoka/Image-Augmentation/releases/tag/v1.3.0
-[1.2.0]: https://github.com/vaishnavkoka/Image-Augmentation/releases/tag/v1.2.0
+[1.4.1]: https://github.com/vaishnavkoka/Image-Augmentation-tool/releases/tag/v1.4.1
+[1.4.0]: https://github.com/vaishnavkoka/Image-Augmentation-tool/releases/tag/v1.4.0
+[1.3.0]: https://github.com/vaishnavkoka/Image-Augmentation-tool/releases/tag/v1.3.0
+[1.2.0]: https://github.com/vaishnavkoka/Image-Augmentation-tool/releases/tag/v1.2.0
