@@ -341,9 +341,9 @@ grid alongside any published result.
   `profile` Strip is a no-op on an untagged sRGB source. A default augmentation
   run yields **161 distinct images**. Moving a slider makes its configuration a
   real mutation.
-- **`annotate` and `colorize` are reachable only through the API.** Neither fits
-  the single-slider pattern, so the catalogue holds 76 operators while the
-  interface reaches 74.
+- **`chop` appears on the Continuous tab, not the Discrete one**, because its
+  size is a slider even though the catalogue files it as discrete. Its direction
+  is a choice inside the same panel.
 - **JPEG output is re-encoded**, adding compression loss on top of the mutation.
   Prefer PNG for research output, or set `JPEG_QUALITY=100`.
 - **Flask's development server** runs the backend, and there is no

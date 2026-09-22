@@ -1465,6 +1465,22 @@
             text-align: right;
         }
 
+        /* Free text, not a numeric entry box. It looked convenient to reuse
+           .num-box here, but the mode logic and the behaviour suite both treat
+           that class as "typed numeric value", so Beginner mode reported a
+           numeric box it was supposed to hide. */
+        .text-box {
+            flex: none;
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            background: var(--surface-3);
+            color: var(--text);
+            font: 500 0.86rem/1.3 inherit;
+            text-align: left;
+        }
+
         .num-box:focus-visible {
             outline: none;
             border-color: var(--filter-hue, var(--accent));
@@ -2723,6 +2739,20 @@
                                 <span id="chopValue">50</span>
                             </div>
                             <div class="slider-row"><input type="range" id="chopSlider" data-mutation="chop" data-param="value" min="1" max="200" value="50" step="1" disabled><input type="text" inputmode="decimal" class="num-box" id="chopNum" aria-label="value" disabled></div><small class="num-hint" id="chopHint"></small>
+                        <div class="radio-group" style="margin-top: 10px;">
+                            <div class="radio-option">
+                                <input type="radio" id="chopHorizontal" name="chop-type" value="horizontal" data-param="type" checked>
+                                <label for="chopHorizontal">Horizontal</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="chopVertical" name="chop-type" value="vertical" data-param="type">
+                                <label for="chopVertical">Vertical</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="chopCenter" name="chop-type" value="center" data-param="type">
+                                <label for="chopCenter">Center</label>
+                            </div>
+                        </div>
                         </div>
                     </div>
 
@@ -2834,6 +2864,16 @@
                                 <input type="radio" id="discreteMorphology" name="discrete-filter" value="morphology" data-mutation="morphology" data-suboption-radio="morphology-method" data-suboption-param="method" data-suboption-panel="morphologySubOptions">
                                 <label for="discreteMorphology">Morphology</label>
                                 <span class="helper-text">Structural morphology with a diamond kernel</span>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="discreteColorize" name="discrete-filter" value="colorize" data-mutation="colorize" data-suboption-radio="colorize-tone" data-suboption-param="tone" data-suboption-panel="colorizeSubOptions">
+                                <label for="discreteColorize">Colorize</label>
+                                <span class="helper-text">Apply a colour tone across the image</span>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="discreteAnnotate" name="discrete-filter" value="annotate" data-mutation="annotate" data-suboption-panel="annotateSubOptions" data-suboptions='[{"field":"annotateText","param":"text"},{"radio":"annotate-size","param":"fontSize"},{"radio":"annotate-position","param":"position"}]'>
+                                <label for="discreteAnnotate">Text Annotation</label>
+                                <span class="helper-text">Draw text onto the image</span>
                             </div>
                             <div class="radio-option">
                                 <input type="radio" id="discreteNegate" name="discrete-filter" value="negate" data-mutation="negate">
@@ -3252,6 +3292,108 @@
                                 <label for="morphEdgeOut">EdgeOut</label>
                             </div>
                         </div>
+
+                    <div class="filter-group" id="colorizeSubOptions" style="display: none;">
+                        <h3>Tone</h3>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="colorize-tonered" name="colorize-tone" value="red" checked>
+                                <label for="colorize-tonered">red</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="colorize-tonegreen" name="colorize-tone" value="green">
+                                <label for="colorize-tonegreen">green</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="colorize-toneblue" name="colorize-tone" value="blue">
+                                <label for="colorize-toneblue">blue</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="colorize-toneyellow" name="colorize-tone" value="yellow">
+                                <label for="colorize-toneyellow">yellow</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="colorize-tonecyan" name="colorize-tone" value="cyan">
+                                <label for="colorize-tonecyan">cyan</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="colorize-tonemagenta" name="colorize-tone" value="magenta">
+                                <label for="colorize-tonemagenta">magenta</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="colorize-tonesepia" name="colorize-tone" value="sepia">
+                                <label for="colorize-tonesepia">sepia</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-group" id="annotateSubOptions" style="display: none;">
+                        <h3>Text</h3>
+                        <div class="slider-container">
+                            <input type="text" id="annotateText" class="text-box"
+                                   placeholder="text to draw" value="SAMPLE" aria-label="annotation text">
+                            <small class="slider-hint">Drawn with a font chosen to cover the characters you type,
+                               so non-Latin text renders rather than falling back to boxes.</small>
+                        </div>
+                        <h3 style="margin-top: 14px;">Size</h3>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="annotate-size24" name="annotate-size" value="24">
+                                <label for="annotate-size24">24</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="annotate-size36" name="annotate-size" value="36" checked>
+                                <label for="annotate-size36">36</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="annotate-size48" name="annotate-size" value="48">
+                                <label for="annotate-size48">48</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="annotate-size72" name="annotate-size" value="72">
+                                <label for="annotate-size72">72</label>
+                            </div>
+                        </div>
+                        <h3 style="margin-top: 14px;">Position</h3>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="annotate-positioncenter" name="annotate-position" value="center" checked>
+                                <label for="annotate-positioncenter">center</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="annotate-positionnorthwest" name="annotate-position" value="northwest">
+                                <label for="annotate-positionnorthwest">northwest</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="annotate-positionnorth" name="annotate-position" value="north">
+                                <label for="annotate-positionnorth">north</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="annotate-positionnortheast" name="annotate-position" value="northeast">
+                                <label for="annotate-positionnortheast">northeast</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="annotate-positionwest" name="annotate-position" value="west">
+                                <label for="annotate-positionwest">west</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="annotate-positioneast" name="annotate-position" value="east">
+                                <label for="annotate-positioneast">east</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="annotate-positionsouthwest" name="annotate-position" value="southwest">
+                                <label for="annotate-positionsouthwest">southwest</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="annotate-positionsouth" name="annotate-position" value="south">
+                                <label for="annotate-positionsouth">south</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="annotate-positionsoutheast" name="annotate-position" value="southeast">
+                                <label for="annotate-positionsoutheast">southeast</label>
+                            </div>
+                        </div>
+                    </div>
                         <p class="slider-hint">Applied with a diamond kernel, matching
                            <code>-morphology METHOD Diamond</code>.</p>
                     </div>
@@ -3802,6 +3944,27 @@
                 const chosen = document.querySelector(`input[name="${radio}"]:checked`);
                 if (chosen) settings.params[param] = chosen.value;
             }
+            // Some operators take more than one sub-option -- annotate needs a
+            // string, a size and a position -- so a second, plural form carries
+            // a list. The single form above stays for the operators that have
+            // exactly one, which is most of them.
+            if (picked.dataset.suboptions) {
+                let extra = [];
+                try {
+                    extra = JSON.parse(picked.dataset.suboptions);
+                } catch (e) {
+                    extra = [];
+                }
+                for (const entry of extra) {
+                    if (entry.radio) {
+                        const chosen = document.querySelector(`input[name="${entry.radio}"]:checked`);
+                        if (chosen) settings.params[entry.param] = chosen.value;
+                    } else if (entry.field) {
+                        const el = document.getElementById(entry.field);
+                        if (el) settings.params[entry.param] = el.value;
+                    }
+                }
+            }
             return settings;
         };
 
@@ -3840,6 +4003,15 @@
                 mutation = settings.mutation;
                 params = {};
                 params[settings.param] = settings.value;
+                // A continuous filter may carry extra choices in its own panel
+                // -- chop's direction is one. Read any radio group inside the
+                // visible group that declares which parameter it fills.
+                const ownGroup = sliders[settings.type]
+                    ? sliders[settings.type].closest('.filter-group') : null;
+                if (ownGroup) {
+                    ownGroup.querySelectorAll('input[type="radio"][data-param]:checked')
+                        .forEach(r => { params[r.dataset.param] = r.value; });
+                }
                 // -channel travels with the request but is not a parameter of
                 // the operator; the backend validates and applies it.
                 const chan = document.querySelector('input[name="channel-select"]:checked');

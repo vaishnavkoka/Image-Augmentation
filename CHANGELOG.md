@@ -3,6 +3,24 @@
 All notable changes to this project are recorded here. Versions follow
 [semantic versioning](https://semver.org/).
 
+## [1.4.1] — 2026-09-22
+
+### Added
+- **Every operator in the catalogue is now reachable from the interface**, 76 of
+  76. `colorize` (7 tones) and `annotate` (free text, 4 sizes, 9 positions) had
+  existed only on the API because neither fits the single-slider pattern, and
+  `chop` had a size slider but no control for its direction, so it was always
+  horizontal whatever the catalogue offered.
+- Discrete filters can now carry more than one sub-option. `annotate` needs a
+  string, a size and a position, where the existing wiring allowed exactly one
+  choice per operator.
+
+### Fixed
+- The annotation text field first reused the `num-box` class, which the mode
+  logic and the behaviour suite both read as "typed numeric value" -- Beginner
+  mode then reported a numeric box it is supposed to hide. Free text has its own
+  class now.
+
 ## [1.4.0] — 2026-09-22
 
 ### Added
@@ -109,6 +127,7 @@ First public release.
   slider positions, so a default augmentation run yields 148 distinct images.
 - `annotate` and `colorize` are reachable only through the API.
 
+[1.4.1]: https://github.com/vaishnavkoka/Image-Augmentation/releases/tag/v1.4.1
 [1.4.0]: https://github.com/vaishnavkoka/Image-Augmentation/releases/tag/v1.4.0
 [1.3.0]: https://github.com/vaishnavkoka/Image-Augmentation/releases/tag/v1.3.0
 [1.2.0]: https://github.com/vaishnavkoka/Image-Augmentation/releases/tag/v1.2.0
