@@ -1,5 +1,17 @@
 # Image-Augmentation
 
+[![Release](https://img.shields.io/github/v/tag/vaishnavkoka/Image-Augmentation?style=flat-square&label=Release&color=0B7285)](https://github.com/vaishnavkoka/Image-Augmentation/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/vaishnavkoka/Image-Augmentation/tests.yml?branch=main&style=flat-square&label=CI&logo=githubactions&logoColor=white)](https://github.com/vaishnavkoka/Image-Augmentation/actions/workflows/tests.yml)
+[![Operators](https://img.shields.io/badge/ImageMagick%20operators-69-4C6EF5?style=flat-square)](#operators)
+[![Configurations](https://img.shields.io/badge/Configurations%20per%20image-160-364FC7?style=flat-square)](#what-it-does)
+[![CLI parity](https://img.shields.io/badge/Pixel--identical%20to%20CLI-61%2F62-2EA44F?style=flat-square)](#validation)
+[![Reproducible](https://img.shields.io/badge/Output-byte--reproducible-2EA44F?style=flat-square)](#what-it-does)
+[![Suites](https://img.shields.io/badge/Validation%20suites-13-9C36B5?style=flat-square)](#validation)
+[![Provenance](https://img.shields.io/badge/Provenance%20accuracy-100%25%20%E2%86%92%2050%25-C92A2A?style=flat-square)](#key-findings)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![ImageMagick](https://img.shields.io/badge/ImageMagick-7.1.1--41%20Q16--HDRI-EE7600?style=flat-square)](https://imagemagick.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
+
 **Image-Augmentation** is a deterministic image augmentation and mutation tool for
 generating reproducible datasets. It applies configurable transformations and
 controlled mutations to images, enabling researchers to systematically create
@@ -68,6 +80,47 @@ default parameter:
 `GET /api/mutations` returns the full catalogue of all 69 with every parameter's
 range and default. `-spread` was deliberately excluded: it is random, which would
 break reproducibility.
+
+## Key findings
+
+`experiments/origin_degradation.py` asks the question the tool exists to serve:
+**which mutations destroy the evidence a provenance classifier relies on?**
+
+The setup is a miniature of camera-origin classification. The same 100 synthetic
+scenes are written through two pipelines — JPEG q92 4:4:4 against q78 4:2:0 — so
+a classifier separating them can only be using processing traces: quantisation
+artefacts, chroma subsampling, noise-residual statistics. Features are classic
+forensic statistics rather than a CNN, which keeps the result about the
+mutations rather than an architecture. A logistic-regression classifier reaches
+**100% on unmutated images**. Chance is 50%.
+
+| Family | n | Accuracy after mutation | Verdict |
+|---|---|---|---|
+| blur | 5 | 50% | destroyed |
+| noise / denoise | 5 | 50% | destroyed |
+| compression / palette | 3 | 50–100% | destroyed except `colors` |
+| geometry | 5 | 50–100% | destroyed only by resampling |
+| stylise | 6 | 31–100% | destroyed except tone-only styles |
+| tone / contrast | 6 | 78–100% | partly degraded |
+| sharpen | 3 | 100% | preserved |
+| colour space | 3 | 100% | preserved |
+
+**Mutations that touch spatial high-frequency content erase provenance
+completely.** Every blur and every denoiser lands exactly on chance, as does
+`resize`, which resamples. **Mutations that remap tone or colour without moving
+pixels leave it fully intact** — `gamma`, `auto_level`, `modulate`, `grayscale`,
+`colorspace` and `profile` all stay at 100%, as do the lossless geometric
+operators, which only permute pixels. `charcoal` falls to **31%**, below chance,
+so it inverts the trace rather than merely destroying it.
+
+For anyone building a corpus, that is directly actionable: a robustness study
+that mutates only with tone and colour operators is not testing provenance
+robustness at all, because the evidence survives untouched.
+
+Two cautions. The provenances are synthetic JPEG pipelines, not real camera
+bodies, so this demonstrates the method rather than a camera-origin result. And
+the 50% floor is a floor: once a family reaches chance, the task cannot rank its
+members against each other.
 
 ## Requirements
 
