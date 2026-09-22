@@ -240,6 +240,10 @@ STRIP_PROFILES = 'Strip'   # the +profile '*' form: remove every profile
 # Rec709Luma, the catalogue advertised Rec601Luma, and omitting the parameter
 # took a third path entirely (colorspace = 'gray'), giving max pixel differences
 # of 152, 172 and 27 between them for the same nominal "default grayscale".
+# Morphology methods worth offering: each is deterministic and each changes
+# the image in a visibly different way. Wand takes them lower-cased.
+MORPHOLOGY_METHODS = ['Dilate', 'Erode', 'Open', 'Close', 'Smooth', 'EdgeIn', 'EdgeOut']
+
 DEFAULT_GRAYSCALE_METHOD = 'Rec709Luma'
 
 # Ordered-dither threshold maps that ImageMagick accepts, checked with
@@ -396,6 +400,15 @@ MUTATION_SPECS = {
     'vignette':           {'sigma':      ('float', 1,  40)},
     'wavelet_denoise':    {'threshold':  ('int',   1,  30)},
     'white_threshold':    {'percentage': ('int',   0,  100)},
+    # v1.3.0. Each was checked pixel-identical to its CLI form before being
+    # added; see tests/oracle_differential.py for the exact commands.
+    'bilateral_blur':     {'width':      ('int',   1,  25)},
+    'contrast_stretch':   {'percentage': ('float', 0,  49)},
+    'linear_stretch':     {'percentage': ('float', 0,  49)},
+    'level':              {'percentage': ('float', 0,  49)},
+    'threshold':          {'percentage': ('float', 0,  100)},
+    'distort':            {'amount':     ('float', -1.0, 1.0)},
+    'morphology':         {'method':     ('choice', lambda: MORPHOLOGY_METHODS)},
     'sharpen':        {'sigma':     ('float', 0.5, 10)},
     'unsharp':        {'sigma':     ('float', 0.5, 10)},
     'solarize':       {'threshold': ('int',   0,   100)},
@@ -1599,6 +1612,71 @@ def create_app():
             image.white_threshold(Color(f'gray({int(percentage)}%)')); return image
 
         @staticmethod
+        def bilateral_blur(image, width=5, **kwargs):
+            """-bilateral-blur WxW+W+W/2: edge-preserving denoise.
+
+            intensity and spatial are stated explicitly rather than left to
+            default. Omitting them lets Wand and the command line each compute
+            their own, and the outputs then differ by up to 5 levels. Derived
+            from the width they are identical.
+            """
+            w = max(1, int(width))
+            image.bilateral_blur(width=w, height=w,
+                                 intensity=float(w), spatial=w / 2.0)
+            return image
+
+        @staticmethod
+        def contrast_stretch(image, percentage=5.0, **kwargs):
+            """-contrast-stretch N%xN%: stretch the histogram, clipping N% off each end."""
+            f = max(0.0, min(float(percentage), 49.0)) / 100.0
+            # Wand's white_point counts from the top, as the CLI's second value
+            # does -- passing 1 - f here stretches the wrong way entirely.
+            image.contrast_stretch(black_point=f, white_point=f)
+            return image
+
+        @staticmethod
+        def linear_stretch(image, percentage=5.0, **kwargs):
+            """-linear-stretch N%xN%: linear histogram stretch."""
+            f = max(0.0, min(float(percentage), 49.0)) / 100.0
+            image.linear_stretch(black_point=f, white_point=f)
+            return image
+
+        @staticmethod
+        def level(image, percentage=10.0, **kwargs):
+            """-level N%,(100-N)%: move the black and white points inward."""
+            f = max(0.0, min(float(percentage), 49.0)) / 100.0
+            image.level(black=f, white=1.0 - f)
+            return image
+
+        @staticmethod
+        def threshold(image, percentage=50.0, **kwargs):
+            """-threshold N%: every pixel becomes black or white."""
+            f = max(0.0, min(float(percentage), 100.0)) / 100.0
+            image.threshold(threshold=f)
+            return image
+
+        @staticmethod
+        def distort(image, amount=0.5, **kwargs):
+            """-distort Barrel "0 0 A": lens-style barrel or pincushion distortion.
+
+            Positive pincushions, negative barrels, which is the pair a camera
+            lens actually produces.
+            """
+            a = max(-1.0, min(float(amount), 1.0))
+            image.distort('barrel', (0.0, 0.0, a))
+            return image
+
+        @staticmethod
+        def morphology(image, method='Dilate', **kwargs):
+            """-morphology METHOD Diamond: structural morphology."""
+            m = str(method)
+            if m not in MORPHOLOGY_METHODS:
+                raise ValidationError(
+                    f"morphology.method must be one of: {', '.join(MORPHOLOGY_METHODS)}")
+            image.morphology(method=m.lower(), kernel='diamond')
+            return image
+
+        @staticmethod
         def sharpen(image, sigma=2.0, **kwargs):
             """-sharpen 0xsigma: sharpen with a Gaussian operator."""
             image.sharpen(radius=0, sigma=float(sigma))
@@ -2122,6 +2200,66 @@ def create_app():
                                   'description': 'Falloff'}
                     }
                 },
+                'bilateral_blur': {
+                    'name': 'Bilateral Blur',
+                    'description': 'Edge-preserving denoise: smooths flat areas, keeps edges',
+                    'category': 'continuous',
+                    'parameters': {
+                        'width': {'type': 'int', 'min': 1, 'max': 25,
+                                  'default': 5, 'step': 2,
+                                  'description': 'Window size'}
+                    }
+                },
+                'contrast_stretch': {
+                    'name': 'Contrast Stretch',
+                    'description': 'Stretch the histogram, clipping a percentage off each end',
+                    'category': 'continuous',
+                    'parameters': {
+                        'percentage': {'type': 'float', 'min': 0, 'max': 49,
+                                  'default': 5, 'step': 0.5,
+                                  'description': 'Percent clipped at each end'}
+                    }
+                },
+                'linear_stretch': {
+                    'name': 'Linear Stretch',
+                    'description': 'Linear histogram stretch',
+                    'category': 'continuous',
+                    'parameters': {
+                        'percentage': {'type': 'float', 'min': 0, 'max': 49,
+                                  'default': 5, 'step': 0.5,
+                                  'description': 'Percent clipped at each end'}
+                    }
+                },
+                'level': {
+                    'name': 'Level',
+                    'description': 'Move the black and white points inward',
+                    'category': 'continuous',
+                    'parameters': {
+                        'percentage': {'type': 'float', 'min': 0, 'max': 49,
+                                  'default': 10, 'step': 0.5,
+                                  'description': 'Percent moved at each end'}
+                    }
+                },
+                'threshold': {
+                    'name': 'Threshold',
+                    'description': 'Every pixel becomes black or white',
+                    'category': 'continuous',
+                    'parameters': {
+                        'percentage': {'type': 'float', 'min': 0, 'max': 100,
+                                  'default': 50, 'step': 1,
+                                  'description': 'Threshold percent'}
+                    }
+                },
+                'distort': {
+                    'name': 'Barrel Distortion',
+                    'description': 'Lens-style distortion: negative barrels, positive pincushions',
+                    'category': 'continuous',
+                    'parameters': {
+                        'amount': {'type': 'float', 'min': -1.0, 'max': 1.0,
+                                  'default': 0.5, 'step': 0.1,
+                                  'description': 'Distortion coefficient'}
+                    }
+                },
                 'wavelet_denoise': {
                     'name': 'Wavelet Denoise',
                     'description': 'Wavelet-domain noise removal',
@@ -2422,6 +2560,19 @@ def create_app():
                     'description': 'Flip about the trailing diagonal',
                     'category': 'discrete',
                     'parameters': {}
+                },
+                'morphology': {
+                    'name': 'Morphology',
+                    'description': 'Structural morphology with a diamond kernel',
+                    'category': 'discrete',
+                    'parameters': {
+                        'method': {
+                            'type': 'choice',
+                            'options': MORPHOLOGY_METHODS,
+                            'default': 'Dilate',
+                            'description': 'Morphological operation'
+                        }
+                    }
                 },
                 'ordered_dither': {
                     'name': 'Ordered Dither',

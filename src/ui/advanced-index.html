@@ -15,7 +15,7 @@
             }
         } catch (e) { /* no stored preference available; fall through to CSS */ }
     </script>
-    <title>Advanced Image Mutation Tool v1.2 &mdash; ImageMagick Filters</title>
+    <title>Advanced Image Mutation Tool v1.3 &mdash; ImageMagick Filters</title>
     <style>
         /* ============================================================
            THEME TOKENS
@@ -1648,7 +1648,7 @@
                     <circle cx="8.5" cy="8.5" r="1.6"/>
                     <path d="M21 15l-5-5L5 21"/>
                 </svg>
-                Advanced Image Mutation Tool<span class="version">v1.2</span>
+                Advanced Image Mutation Tool<span class="version">v1.3</span>
             </h1>
             <p>Continuous &amp; Discrete Controls</p>
             <div class="mode-bar">
@@ -1962,6 +1962,36 @@
                                 <input type="radio" id="filterWhiteThreshold" name="continuous-filter" value="white_threshold">
                                 <label for="filterWhiteThreshold">White Threshold</label>
                                 <span class="helper-text">Force everything above the threshold to white</span>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="filterBilateralBlur" name="continuous-filter" value="bilateral_blur">
+                                <label for="filterBilateralBlur">Bilateral Blur</label>
+                                <span class="helper-text">Edge-preserving denoise: smooths flat areas, keeps edges</span>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="filterContrastStretch" name="continuous-filter" value="contrast_stretch">
+                                <label for="filterContrastStretch">Contrast Stretch</label>
+                                <span class="helper-text">Stretch the histogram, clipping a percentage off each end</span>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="filterLinearStretch" name="continuous-filter" value="linear_stretch">
+                                <label for="filterLinearStretch">Linear Stretch</label>
+                                <span class="helper-text">Linear histogram stretch</span>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="filterLevel" name="continuous-filter" value="level">
+                                <label for="filterLevel">Level</label>
+                                <span class="helper-text">Move the black and white points inward</span>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="filterThreshold" name="continuous-filter" value="threshold">
+                                <label for="filterThreshold">Threshold</label>
+                                <span class="helper-text">Every pixel becomes black or white</span>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="filterDistort" name="continuous-filter" value="distort">
+                                <label for="filterDistort">Barrel Distortion</label>
+                                <span class="helper-text">Lens-style distortion: negative barrels, positive pincushions</span>
                             </div>
                             <div class="radio-option">
                                 <input type="radio" id="filterGaussianBlur" name="continuous-filter" value="gaussian-blur">
@@ -2400,6 +2430,78 @@
                         </div>
                     </div>
 
+                    <div class="filter-group" id="bilateralBlurGroup" style="display: none;">
+                        <h3>Bilateral Blur</h3>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Window size</span>
+                                <span id="bilateralBlurValue">5</span>
+                            </div>
+                            <div class="slider-row"><input type="range" id="bilateralBlurSlider" data-mutation="bilateral_blur" data-param="width" min="1" max="25" value="5" step="2" disabled><input type="text" inputmode="decimal" class="num-box" id="bilateralBlurNum" aria-label="value" disabled></div><small class="num-hint" id="bilateralBlurHint"></small>
+                            <small class="slider-hint">1 to 25</small>
+                        </div>
+                    </div>
+
+                    <div class="filter-group" id="contrastStretchGroup" style="display: none;">
+                        <h3>Contrast Stretch</h3>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Percent clipped at each end</span>
+                                <span id="contrastStretchValue">5</span>
+                            </div>
+                            <div class="slider-row"><input type="range" id="contrastStretchSlider" data-mutation="contrast_stretch" data-param="percentage" min="0" max="49" value="5" step="0.5" disabled><input type="text" inputmode="decimal" class="num-box" id="contrastStretchNum" aria-label="value" disabled></div><small class="num-hint" id="contrastStretchHint"></small>
+                            <small class="slider-hint">0 to 49</small>
+                        </div>
+                    </div>
+
+                    <div class="filter-group" id="linearStretchGroup" style="display: none;">
+                        <h3>Linear Stretch</h3>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Percent clipped at each end</span>
+                                <span id="linearStretchValue">5</span>
+                            </div>
+                            <div class="slider-row"><input type="range" id="linearStretchSlider" data-mutation="linear_stretch" data-param="percentage" min="0" max="49" value="5" step="0.5" disabled><input type="text" inputmode="decimal" class="num-box" id="linearStretchNum" aria-label="value" disabled></div><small class="num-hint" id="linearStretchHint"></small>
+                            <small class="slider-hint">0 to 49</small>
+                        </div>
+                    </div>
+
+                    <div class="filter-group" id="levelGroup" style="display: none;">
+                        <h3>Level</h3>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Percent moved at each end</span>
+                                <span id="levelValue">10</span>
+                            </div>
+                            <div class="slider-row"><input type="range" id="levelSlider" data-mutation="level" data-param="percentage" min="0" max="49" value="10" step="0.5" disabled><input type="text" inputmode="decimal" class="num-box" id="levelNum" aria-label="value" disabled></div><small class="num-hint" id="levelHint"></small>
+                            <small class="slider-hint">0 to 49</small>
+                        </div>
+                    </div>
+
+                    <div class="filter-group" id="thresholdGroup" style="display: none;">
+                        <h3>Threshold</h3>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Threshold percent</span>
+                                <span id="thresholdValue">50</span>
+                            </div>
+                            <div class="slider-row"><input type="range" id="thresholdSlider" data-mutation="threshold" data-param="percentage" min="0" max="100" value="50" step="1" disabled><input type="text" inputmode="decimal" class="num-box" id="thresholdNum" aria-label="value" disabled></div><small class="num-hint" id="thresholdHint"></small>
+                            <small class="slider-hint">0 to 100</small>
+                        </div>
+                    </div>
+
+                    <div class="filter-group" id="distortGroup" style="display: none;">
+                        <h3>Barrel Distortion</h3>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Distortion coefficient</span>
+                                <span id="distortValue">0.5</span>
+                            </div>
+                            <div class="slider-row"><input type="range" id="distortSlider" data-mutation="distort" data-param="amount" min="-1.0" max="1.0" value="0.5" step="0.1" disabled><input type="text" inputmode="decimal" class="num-box" id="distortNum" aria-label="value" disabled></div><small class="num-hint" id="distortHint"></small>
+                            <small class="slider-hint">-1.0 to 1.0</small>
+                        </div>
+                    </div>
+
                     <!-- Colors Filter -->
                     <div class="filter-group" id="colorsGroup" style="display: none;">
                         <h3>Colors (Reduce Palette)</h3>
@@ -2615,17 +2717,17 @@
                                 <span class="helper-text">No discrete filter</span>
                             </div>
                             <div class="radio-option">
-                                <input type="radio" id="discreteColorspace" name="discrete-filter" value="colorspace" data-mutation="colorspace" data-suboption-radio="colorspace-type" data-suboption-param="colorspace">
+                                <input type="radio" id="discreteColorspace" name="discrete-filter" value="colorspace" data-suboption-panel="colorspaceSubOptions" data-mutation="colorspace" data-suboption-radio="colorspace-type" data-suboption-param="colorspace">
                                 <label for="discreteColorspace">Colorspace Conversion</label>
                                 <span class="helper-text">Convert between different color models and spaces</span>
                             </div>
                             <div class="radio-option">
-                                <input type="radio" id="discreteGrayscale" name="discrete-filter" value="grayscale" data-mutation="grayscale" data-suboption-radio="grayscale-method" data-suboption-param="method">
+                                <input type="radio" id="discreteGrayscale" name="discrete-filter" value="grayscale" data-suboption-panel="grayscaleSubOptions" data-mutation="grayscale" data-suboption-radio="grayscale-method" data-suboption-param="method">
                                 <label for="discreteGrayscale">Grayscale</label>
                                 <span class="helper-text">Convert to black and white using various methods</span>
                             </div>
                             <div class="radio-option">
-                                <input type="radio" id="discreteProfile" name="discrete-filter" value="profile" data-mutation="profile" data-suboption-radio="profile-name" data-suboption-param="profile">
+                                <input type="radio" id="discreteProfile" name="discrete-filter" value="profile" data-suboption-panel="profileSubOptions" data-mutation="profile" data-suboption-radio="profile-name" data-suboption-param="profile">
                                 <label for="discreteProfile">Color Profile</label>
                                 <span class="helper-text">Apply ICC color profile for accurate color reproduction</span>
                             </div>
@@ -2690,9 +2792,14 @@
                                 <span class="helper-text">Flip about the trailing diagonal</span>
                             </div>
                             <div class="radio-option">
-                                <input type="radio" id="discreteOrderedDither" name="discrete-filter" value="ordered_dither" data-mutation="ordered_dither" data-suboption-radio="dither-map" data-suboption-param="threshold_map">
+                                <input type="radio" id="discreteOrderedDither" name="discrete-filter" value="ordered_dither" data-suboption-panel="ditherSubOptions" data-mutation="ordered_dither" data-suboption-radio="dither-map" data-suboption-param="threshold_map">
                                 <label for="discreteOrderedDither">Ordered Dither</label>
                                 <span class="helper-text">Dither using an ordered threshold map</span>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="discreteMorphology" name="discrete-filter" value="morphology" data-mutation="morphology" data-suboption-radio="morphology-method" data-suboption-param="method" data-suboption-panel="morphologySubOptions">
+                                <label for="discreteMorphology">Morphology</label>
+                                <span class="helper-text">Structural morphology with a diamond kernel</span>
                             </div>
                             <div class="radio-option">
                                 <input type="radio" id="discreteNegate" name="discrete-filter" value="negate" data-mutation="negate">
@@ -3079,6 +3186,42 @@
                         </div>
                     </div>
 
+                    <div class="filter-group" id="morphologySubOptions" style="display: none;">
+                        <h3>Morphological Operation</h3>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="morphDilate" name="morphology-method" value="Dilate" checked>
+                                <label for="morphDilate">Dilate</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="morphErode" name="morphology-method" value="Erode">
+                                <label for="morphErode">Erode</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="morphOpen" name="morphology-method" value="Open">
+                                <label for="morphOpen">Open</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="morphClose" name="morphology-method" value="Close">
+                                <label for="morphClose">Close</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="morphSmooth" name="morphology-method" value="Smooth">
+                                <label for="morphSmooth">Smooth</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="morphEdgeIn" name="morphology-method" value="EdgeIn">
+                                <label for="morphEdgeIn">EdgeIn</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="morphEdgeOut" name="morphology-method" value="EdgeOut">
+                                <label for="morphEdgeOut">EdgeOut</label>
+                            </div>
+                        </div>
+                        <p class="slider-hint">Applied with a diamond kernel, matching
+                           <code>-morphology METHOD Diamond</code>.</p>
+                    </div>
+
                     <div class="filter-group" id="grayscaleSubOptions" style="display: none;">
                         <h3>Grayscale Method</h3>
                         <div class="radio-group">
@@ -3290,26 +3433,20 @@
         // Discrete filter type selection handlers
         document.querySelectorAll('input[name="discrete-filter"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
-                const filterType = e.target.value;
-                
-                // Hide all option panels first
-                document.getElementById('colorspaceSubOptions').style.display = 'none';
-                document.getElementById('grayscaleSubOptions').style.display = 'none';
-                document.getElementById('profileSubOptions').style.display = 'none';
-                document.getElementById('ditherSubOptions').style.display = 'none';
-                
-                // Show the selected filter's options (if applicable)
-                if (filterType === 'colorspace') {
-                    document.getElementById('colorspaceSubOptions').style.display = 'block';
-                } else if (filterType === 'grayscale') {
-                    document.getElementById('grayscaleSubOptions').style.display = 'block';
-                } else if (filterType === 'profile') {
-                    document.getElementById('profileSubOptions').style.display = 'block';
-                } else if (selected === 'ordered_dither') {
-                    document.getElementById('ditherSubOptions').style.display = 'block';
-                }
-                // Other discrete filters (flip, flop, contrast, monochrome, negate, normalize)
-                // don't have sub-options, so no additional panels to show
+                // Each radio names its own panel in data-suboption-panel, so this
+                // needs no list of filter names. The chain it replaced ended in
+                // `else if (selected === 'ordered_dither')`, and `selected` does
+                // not exist in this scope -- so choosing any discrete filter
+                // outside the first three branches threw a ReferenceError and
+                // the dither panel never opened at all.
+                document.querySelectorAll('input[name="discrete-filter"]').forEach(r => {
+                    const id = r.dataset.suboptionPanel;
+                    const panel = id ? document.getElementById(id) : null;
+                    if (panel) panel.style.display = 'none';
+                });
+                const ownPanelId = e.target.dataset.suboptionPanel;
+                const ownPanel = ownPanelId ? document.getElementById(ownPanelId) : null;
+                if (ownPanel) ownPanel.style.display = 'block';
             });
         });
 
@@ -3770,6 +3907,13 @@
             { mutation: 'vignette', slider: 'vignetteSlider', param: 'sigma' },
             { mutation: 'wavelet_denoise', slider: 'waveletDenoiseSlider', param: 'threshold' },
             { mutation: 'white_threshold', slider: 'whiteThresholdSlider', param: 'percentage' },
+            { mutation: 'bilateral_blur',   slider: 'bilateralBlurSlider',  param: 'width' },
+            { mutation: 'contrast_stretch', slider: 'contrastStretchSlider',param: 'percentage' },
+            { mutation: 'linear_stretch',   slider: 'linearStretchSlider',  param: 'percentage' },
+            { mutation: 'level',            slider: 'levelSlider',          param: 'percentage' },
+            { mutation: 'threshold',        slider: 'thresholdSlider',      param: 'percentage' },
+            { mutation: 'distort',          slider: 'distortSlider',        param: 'amount' },
+            { mutation: 'morphology',       radio:  'morphology-method',    param: 'method', expand: true },
             { mutation: 'magnify' },
             { mutation: 'transpose' },
             { mutation: 'transverse' },

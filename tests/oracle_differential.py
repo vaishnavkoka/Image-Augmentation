@@ -94,6 +94,20 @@ CASES = [
     ('vignette',           {'sigma': 10},       ['-vignette', '0x10+10+10']),
     ('wavelet_denoise',    {'threshold': 5},    ['-wavelet-denoise', '5%']),
     ('white_threshold',    {'percentage': 60},  ['-white-threshold', '60%']),
+
+    # v1.3.0. bilateral_blur states intensity and spatial explicitly on both
+    # sides: left to default, Wand and the CLI each compute their own and the
+    # outputs differ by up to 5 levels. contrast_stretch and linear_stretch
+    # take the clip fraction at BOTH ends -- Wand's white_point counts from the
+    # top, as the CLI's second value does, and passing 1-f stretches the wrong
+    # way entirely (255 levels out).
+    ('bilateral_blur',     {'width': 5},        ['-bilateral-blur', '5x5+5+2.5']),
+    ('contrast_stretch',   {'percentage': 5},   ['-contrast-stretch', '5%x5%']),
+    ('linear_stretch',     {'percentage': 5},   ['-linear-stretch', '5%x5%']),
+    ('level',              {'percentage': 10},  ['-level', '10%,90%']),
+    ('threshold',          {'percentage': 50},  ['-threshold', '50%']),
+    ('distort',            {'amount': 0.5},     ['-distort', 'Barrel', '0.0 0.0 0.5']),
+    ('morphology',         {'method': 'Dilate'},['-morphology', 'Dilate', 'Diamond']),
 ]
 
 

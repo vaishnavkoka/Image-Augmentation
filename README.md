@@ -2,9 +2,9 @@
 
 [![Release](https://img.shields.io/github/v/tag/vaishnavkoka/Image-Augmentation?style=flat-square&label=Release&color=0B7285)](https://github.com/vaishnavkoka/Image-Augmentation/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/vaishnavkoka/Image-Augmentation/tests.yml?branch=main&style=flat-square&label=CI&logo=githubactions&logoColor=white)](https://github.com/vaishnavkoka/Image-Augmentation/actions/workflows/tests.yml)
-[![Operators](https://img.shields.io/badge/ImageMagick%20operators-69-4C6EF5?style=flat-square)](#operators)
-[![Configurations](https://img.shields.io/badge/Configurations%20per%20image-160-364FC7?style=flat-square)](#what-it-does)
-[![CLI parity](https://img.shields.io/badge/Pixel--identical%20to%20CLI-61%2F62-2EA44F?style=flat-square)](#validation)
+[![Operators](https://img.shields.io/badge/ImageMagick%20operators-76-4C6EF5?style=flat-square)](#operators)
+[![Configurations](https://img.shields.io/badge/Configurations%20per%20image-173-364FC7?style=flat-square)](#what-it-does)
+[![CLI parity](https://img.shields.io/badge/Pixel--identical%20to%20CLI-68%2F69-2EA44F?style=flat-square)](#validation)
 [![Reproducible](https://img.shields.io/badge/Output-byte--reproducible-2EA44F?style=flat-square)](#what-it-does)
 [![Suites](https://img.shields.io/badge/Validation%20suites-13-9C36B5?style=flat-square)](#validation)
 [![Provenance](https://img.shields.io/badge/Provenance%20accuracy-100%25%20%E2%86%92%2050%25-C92A2A?style=flat-square)](#key-findings)
@@ -27,7 +27,7 @@ Two related but distinct guarantees, worth separating because a paper may need
 to cite either:
 
 - **Against ImageMagick** — the tool's output is *pixel-identical* to the same
-  operator run on the `magick` command line (61 of 62 comparisons, the remaining
+  operator run on the `magick` command line (68 of 69 comparisons, the remaining
   one within a single quantum). The PNG container may differ in compression, so
   the files are not byte-identical while the image data is.
 - **Against itself** — the same input and parameters produce *byte-identical*
@@ -41,18 +41,18 @@ to cite either:
 
 | | |
 |---|---|
-| Operators | **69** (49 continuous with a parameter, 20 discrete) |
-| Configurations per image | **160**, of which 148 are distinct at default settings |
-| Verified against | the ImageMagick command line — **61 of 62 pixel-identical**, 1 within one quantum |
+| Operators | **76** (55 continuous with a parameter, 21 discrete) |
+| Configurations per image | **173**, of which 161 are distinct at default settings |
+| Verified against | the ImageMagick command line — **68 of 69 pixel-identical**, 1 within one quantum |
 | Output | byte-reproducible across runs |
 | Interface | three modes (Beginner, Intermediate, Advanced) |
 | Validation | **13 test suites**, one command |
 
 ## Operators
 
-All 69 map to documented ImageMagick command-line options. The 20 added most
-recently were each verified pixel-identical to their CLI form at the catalogue's
-default parameter:
+All 76 map to documented ImageMagick command-line options. Every operator added
+since the first release was verified pixel-identical to its CLI form at the
+catalogue's default parameter before being accepted:
 
 | Operator | ImageMagick option | Reference |
 |---|---|---|
@@ -76,10 +76,17 @@ default parameter:
 | `vignette` | `-vignette` | [docs](https://imagemagick.org/script/command-line-options.php#vignette) |
 | `wavelet_denoise` | `-wavelet-denoise` | [docs](https://imagemagick.org/script/command-line-options.php#wavelet-denoise) |
 | `white_threshold` | `-white-threshold` | [docs](https://imagemagick.org/script/command-line-options.php#white-threshold) |
+| `bilateral_blur` | `-bilateral-blur` | [docs](https://imagemagick.org/script/command-line-options.php#bilateral-blur) |
+| `contrast_stretch` | `-contrast-stretch` | [docs](https://imagemagick.org/script/command-line-options.php#contrast-stretch) |
+| `linear_stretch` | `-linear-stretch` | [docs](https://imagemagick.org/script/command-line-options.php#linear-stretch) |
+| `level` | `-level` | [docs](https://imagemagick.org/script/command-line-options.php#level) |
+| `threshold` | `-threshold` | [docs](https://imagemagick.org/script/command-line-options.php#threshold) |
+| `distort` | `-distort Barrel` | [docs](https://imagemagick.org/script/command-line-options.php#distort) |
+| `morphology` | `-morphology` | [docs](https://imagemagick.org/script/command-line-options.php#morphology) |
 
 `GET /api/mutations` returns the full catalogue of all 69 with every parameter's
-range and default. `-spread` was deliberately excluded: it is random, which would
-break reproducibility.
+range and default. `-spread`, `-sketch` and Wand's `noise` were deliberately excluded: all three
+are random, which would break reproducibility.
 
 ## Key findings
 
@@ -203,7 +210,7 @@ Image-Augmentation/
 │
 ├── src/
 │   ├── backend/                the engine
-│   │   ├── app.py              Flask API, catalogue, all 69 operators
+│   │   ├── app.py              Flask API, catalogue, all 76 operators
 │   │   ├── mutation_worker.py  applies one mutation, in its own process
 │   │   ├── worker_pool.py      keeps workers alive, replaces them when they die
 │   │   └── .env.example        configuration template
@@ -230,7 +237,7 @@ Image-Augmentation/
 │   ├── edge_cases.py           exotic images, parameter bounds, frames
 │   ├── smoke_all_mutations.py  every operator still changes the image
 │   ├── ui_wiring.py            every control maps to a catalogue entry
-│   ├── augmentation_grid.py    all 160 configurations, end to end
+│   ├── augmentation_grid.py    all 173 configurations, end to end
 │   ├── download_paths.py       downloads, batch ZIP, traversal refusal
 │   ├── ui_behaviour.py         theme, numeric entry, caps, in a real browser
 │   └── build_matrix.py         the catalogue on more than one ImageMagick
@@ -280,7 +287,7 @@ Created at runtime and not tracked: `outputs/`, `uploads/`, `src/backend/venv/`,
 | `oracle_suboptions` | all 31 colorspaces, 9 grayscale methods, 50 profiles, 7 dither maps |
 | `oracle_defaults` | the documented default is the one the interface sends |
 | `ui_wiring` | every control maps to a real catalogue entry |
-| `augmentation_grid` | all 160 configurations apply, and how many are distinct |
+| `augmentation_grid` | all 173 configurations apply, and how many are distinct |
 | `download_paths` | downloads, batch ZIP, traversal refusal |
 | `ui_behaviour` | theme, numeric entry, upload caps, in a real browser |
 | `build_matrix` | the catalogue on more than one ImageMagick, and that none crashes the server |
@@ -298,14 +305,14 @@ grid alongside any published result.
   line was established against **ImageMagick 7.1.1-41 Q16-HDRI**. Q16 and
   Q16-HDRI round differently for operators such as `edge` and `emboss`. Pin the
   build when publishing.
-- **Eight of the 160 configurations return the input unchanged at default slider
+- **Eight of the 173 configurations return the input unchanged at default slider
   positions** — `median` at kernel 1 and `gamma` at 1.0 are the identity, and
   `profile` Strip is a no-op on an untagged sRGB source. A default augmentation
-  run yields **148 distinct images**. Moving a slider makes its configuration a
+  run yields **161 distinct images**. Moving a slider makes its configuration a
   real mutation.
 - **`annotate` and `colorize` are reachable only through the API.** Neither fits
-  the single-slider pattern, so the catalogue holds 69 operators while the
-  interface reaches 67.
+  the single-slider pattern, so the catalogue holds 76 operators while the
+  interface reaches 74.
 - **JPEG output is re-encoded**, adding compression loss on top of the mutation.
   Prefer PNG for research output, or set `JPEG_QUALITY=100`.
 - **Flask's development server** runs the backend, and there is no

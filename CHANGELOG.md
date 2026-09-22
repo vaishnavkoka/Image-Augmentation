@@ -3,6 +3,38 @@
 All notable changes to this project are recorded here. Versions follow
 [semantic versioning](https://semver.org/).
 
+## [1.3.0] — 2026-09-22
+
+### Added
+- **Seven operators**, taking the catalogue to **76** (55 continuous, 21
+  discrete) and the grid to **173 configurations per image**, 161 of them
+  distinct at default settings:
+  `bilateral_blur`, `contrast_stretch`, `linear_stretch`, `level`, `threshold`,
+  `distort` (barrel/pincushion) and `morphology` (7 methods on a diamond
+  kernel). Each was verified pixel-identical to its ImageMagick command-line
+  form before being accepted.
+- `bilateral_blur` is the one that matters most for provenance work: it is an
+  edge-preserving denoise, so it erases noise-residual statistics while leaving
+  structure intact.
+
+### Fixed
+- **The discrete sub-option panels were driven by a hand-written chain that
+  ended in `else if (selected === 'ordered_dither')`, and `selected` does not
+  exist in that scope.** Choosing any discrete filter outside the first three
+  branches threw a `ReferenceError`, so the ordered-dither panel never opened.
+  Panels are now named on the radio that owns them and resolved generically.
+
+### Notes on what was rejected
+- Wand's `noise` **adds** random noise rather than performing the command
+  line's `-noise radius` reduction, so it was excluded on reproducibility
+  grounds, as `-spread` and `-sketch` were before it.
+- `bilateral_blur` diverged from the command line by up to 5 levels until
+  intensity and spatial were stated explicitly on both sides. Left to default,
+  Wand and ImageMagick each compute their own.
+- `contrast_stretch` and `linear_stretch` take the clip fraction at *both*
+  ends: Wand's `white_point` counts from the top, as the command line's second
+  value does. Passing `1 - f` stretches the wrong way, by 255 levels.
+
 ## [1.2.0] — 2026-09-21
 
 First public release.
@@ -55,4 +87,5 @@ First public release.
   slider positions, so a default augmentation run yields 148 distinct images.
 - `annotate` and `colorize` are reachable only through the API.
 
+[1.3.0]: https://github.com/vaishnavkoka/Image-Augmentation/releases/tag/v1.3.0
 [1.2.0]: https://github.com/vaishnavkoka/Image-Augmentation/releases/tag/v1.2.0
