@@ -1,0 +1,20 @@
+# Normalise line endings so a checkout on Windows does not rewrite the shell
+# scripts and break them.
+* text=auto eol=lf
+
+*.sh  text eol=lf
+*.py  text eol=lf
+*.md  text eol=lf
+*.cmd text eol=crlf
+
+# Binary, never diffed or line-ending converted
+*.png binary
+*.jpg binary
+*.pdf binary
+*.icc binary
+*.xlsx binary
+*.gz  binary
+
+# Keep generated reports and vendored code out of language statistics
+docs/reports/**   linguist-documentation
+src/ui/vendor/**  linguist-vendored

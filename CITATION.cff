@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+title: "Image-Augmentation: a deterministic image mutation tool for reproducible datasets"
+message: "If you use this tool in your research, please cite it."
+type: software
+authors:
+  - family-names: Koka
+    given-names: Vaishnav
+repository-code: "https://github.com/vaishnavkoka/Image-Augmentation"
+license: MIT
+version: 1.2.0
+date-released: "2026-09-21"
+keywords:
+  - image augmentation
+  - image mutation
+  - reproducible research
+  - dataset generation
+  - ImageMagick
+  - image provenance
+abstract: >-
+  A deterministic image augmentation and mutation tool built on ImageMagick.
+  It exposes 69 operators through a web interface and an HTTP API, producing
+  160 configurations per image. Output is byte-reproducible across runs and
+  pixel-identical to the equivalent ImageMagick command line, so a generated
+  corpus can be reproduced rather than archived. Thirteen validation suites
+  check the operators against the reference implementation, the interface
+  against the catalogue, and the server against operators that can crash it.

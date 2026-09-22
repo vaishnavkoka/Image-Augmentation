@@ -1,0 +1,66 @@
+name: tests
+
+# What this can and cannot check.
+#
+# The full validation suite compares the tool against a purpose-built
+# ImageMagick with the PNG, TIFF, WebP and freetype delegates. A GitHub runner
+# has whatever its apt packages provide, which is usually less, so the
+# differential oracle cannot run meaningfully here.
+#
+# What CI does check is the part that a missing delegate cannot excuse: that the
+# interface still matches the catalogue, that the download routes behave, and --
+# most importantly -- that no operator can take the server down. That last one
+# is the regression that matters: `median` on a stock ImageMagick raises SIGFPE
+# and used to kill the whole process.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  degraded-mode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install ImageMagick and its Python binding
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick libmagickwand-dev
+          magick -version || convert -version
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Report what this ImageMagick can do
+        run: |
+          echo "Delegates available on this runner:"
+          magick -version | grep -i delegates || true
+
+      - name: Start the backend in degraded mode
+        run: |
+          cp configs/.env.example src/backend/.env
+          cd src/backend
+          ALLOW_DEGRADED=1 python app.py &
+          cd -
+          for i in $(seq 1 40); do
+            curl -fsS -m 2 http://127.0.0.1:5000/api/health && break || sleep 2
+          done
+          curl -fsS http://127.0.0.1:5000/api/health
+
+      - name: No operator may take the server down
+        run: python tests/build_matrix.py
+
+      - name: Every control maps to a real catalogue entry
+        run: python tests/ui_wiring.py
+
+      - name: Download routes and traversal refusal
+        run: python tests/download_paths.py

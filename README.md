@@ -135,31 +135,82 @@ One source image through eight operators — see `examples/`:
 
 ![Beginner mode, light theme](docs/screenshots/02-beginner-light.png)
 
-## Directory structure
+## Repository organisation
 
 ```
-.
+Image-Augmentation/
+├── README.md                   this file
+├── CHANGELOG.md                what changed in each version
+├── CITATION.cff                how to cite the tool
+├── LICENSE                     MIT
+├── requirements.txt            runtime dependencies
+├── run.sh                      start the API and the interface
+├── setup.sh                    build the virtualenv, check the environment
+├── doctor.py                   diagnose delegates, fonts, ports
+│
 ├── src/
-│   ├── backend/        Flask API, the mutation engine, worker processes
-│   └── ui/             single-file web interface + its static server
-├── configs/            .env.example — copy to src/backend/.env to configure
-├── assets/icc/         49 bundled ICC profiles, so colour work is host-independent
+│   ├── backend/                the engine
+│   │   ├── app.py              Flask API, catalogue, all 69 operators
+│   │   ├── mutation_worker.py  applies one mutation, in its own process
+│   │   ├── worker_pool.py      keeps workers alive, replaces them when they die
+│   │   └── .env.example        configuration template
+│   └── ui/
+│       ├── advanced-index.html single-file interface, no build step
+│       ├── frontend_server.py  serves exactly two files, by allowlist
+│       └── vendor/             jszip, for client-side ZIP downloads
+│
+├── configs/.env.example        copy to src/backend/.env to configure
+├── assets/icc/                 49 bundled ICC profiles + provenance README
+│
 ├── examples/
-│   ├── input/          sample source image
-│   └── output/         sample results
-├── tests/              13 validation suites, run by tests/run_all.sh
-├── scripts/            setup, packaging, ImageMagick build, restore points
-├── bench/              throughput and comparison benchmarks
-├── experiments/        downstream provenance-classifier experiment
+│   ├── input/                  sample source image
+│   └── output/                 sample results, one per operator family
+│
+├── tests/                      13 validation suites
+│   ├── run_all.sh              runs all of them, one command
+│   ├── oracle_differential.py  pixel equality with the magick command line
+│   ├── oracle_metamorphic.py   properties needing no reference
+│   ├── oracle_formats.py       every format through every filter class
+│   ├── oracle_suboptions.py    colorspaces, grayscale methods, profiles, dithers
+│   ├── oracle_defaults.py      documented default == the one the UI sends
+│   ├── adversarial.py          hostile input
+│   ├── edge_cases.py           exotic images, parameter bounds, frames
+│   ├── smoke_all_mutations.py  every operator still changes the image
+│   ├── ui_wiring.py            every control maps to a catalogue entry
+│   ├── augmentation_grid.py    all 160 configurations, end to end
+│   ├── download_paths.py       downloads, batch ZIP, traversal refusal
+│   ├── ui_behaviour.py         theme, numeric entry, caps, in a real browser
+│   └── build_matrix.py         the catalogue on more than one ImageMagick
+│
+├── scripts/
+│   ├── install-imagemagick.sh  build a complete ImageMagick without root
+│   ├── package.sh              build a distributable archive
+│   ├── restore-point.sh        whole-tree snapshot and rollback
+│   └── rollback.sh             switch between interface versions
+│
+├── bench/                      throughput and library comparisons
+├── experiments/                downstream provenance-classifier experiment
+│
 ├── docs/
-│   ├── DOCUMENTATION.md    full reference
-│   ├── reports/            technical report and paper
+│   ├── DOCUMENTATION.md        full reference
+│   ├── reports/                technical report and paper, with figures
 │   └── screenshots/
-├── run.sh  setup.sh  doctor.py
-└── requirements.txt
+│
+└── .github/workflows/          CI: degraded-mode checks on every push
 ```
 
-`outputs/` and `uploads/` are created at runtime and are not tracked.
+Created at runtime and not tracked: `outputs/`, `uploads/`, `src/backend/venv/`,
+`src/backend/.env`, `dist/`.
+
+### Where to start reading
+
+| If you want to | Read |
+|---|---|
+| Use the tool | this README, then `docs/DOCUMENTATION.md` |
+| Know what an operator does | `GET /api/mutations`, or the operator table above |
+| Trust the output | `tests/oracle_differential.py` and `docs/reports/` |
+| Change the engine | `src/backend/app.py`, then run `tests/run_all.sh` |
+| Cite it | `CITATION.cff` |
 
 ## Validation
 
@@ -206,6 +257,22 @@ grid alongside any published result.
   Prefer PNG for research output, or set `JPEG_QUALITY=100`.
 - **Flask's development server** runs the backend, and there is no
   authentication or rate limiting. It is a research tool, not a public service.
+
+## Citing
+
+If you use this tool in research, cite it via `CITATION.cff` — GitHub renders a
+ready-made citation from it under **Cite this repository** on the repository
+page. Record the ImageMagick version and the parameter grid alongside any
+published result, since byte-equality is specific to a build.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md). Releases are tagged, so a specific version can
+be checked out and reproduced:
+
+```bash
+git checkout v1.2.0
+```
 
 ## Licence
 
