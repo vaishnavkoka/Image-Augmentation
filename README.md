@@ -253,7 +253,6 @@ Image-Augmentation/
 │
 ├── docs/
 │   ├── DOCUMENTATION.md        full reference
-│   ├── reports/                technical report and paper, with figures
 │   └── screenshots/
 │
 └── .github/workflows/          CI: degraded-mode checks on every push
@@ -268,7 +267,7 @@ Created at runtime and not tracked: `outputs/`, `uploads/`, `src/backend/venv/`,
 |---|---|
 | Use the tool | this README, then `docs/DOCUMENTATION.md` |
 | Know what an operator does | `GET /api/mutations`, or the operator table above |
-| Trust the output | `tests/oracle_differential.py` and `docs/reports/` |
+| Trust the output | `tests/oracle_differential.py`, then run `tests/run_all.sh` |
 | Change the engine | `src/backend/app.py`, then run `tests/run_all.sh` |
 | Cite it | `CITATION.cff` |
 

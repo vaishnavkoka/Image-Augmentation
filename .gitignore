@@ -32,3 +32,15 @@ scripts/restore-points/
 .vscode/
 .idea/
 .DS_Store
+
+# Research artefacts, kept local until they are ready to publish: the technical
+# report, the paper, their LaTeX sources and build products, and the figures.
+docs/reports/
+*.pdf
+
+# LaTeX build products, never worth tracking anywhere
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
