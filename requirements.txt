@@ -9,3 +9,7 @@ Wand==0.7.2             # ImageMagick binding - does the mutations
 Pillow==12.3.0          # fallback engine for formats ImageMagick lacks a delegate for
 numpy==2.2.6            # used by the fallback implode / rotational-blur / raise
 python-dotenv==1.2.3
+
+# Optional. The command line uses it for progress bars when present and falls
+# back to a built-in bar when absent, so it is not required to run the tool.
+tqdm==4.70.1

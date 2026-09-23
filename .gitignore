@@ -44,3 +44,7 @@ docs/reports/
 *.out
 *.toc
 *.synctex.gz
+
+# CLI run logs, local to each machine
+cli-version/logs/*
+!cli-version/logs/.gitkeep

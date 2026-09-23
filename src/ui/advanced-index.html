@@ -15,7 +15,7 @@
             }
         } catch (e) { /* no stored preference available; fall through to CSS */ }
     </script>
-    <title>Advanced Image Mutation Tool v1.5 &mdash; ImageMagick Filters</title>
+    <title>Advanced Image Mutation Tool v1.6 &mdash; ImageMagick Filters</title>
     <style>
         /* ============================================================
            THEME TOKENS
@@ -1664,7 +1664,7 @@
                     <circle cx="8.5" cy="8.5" r="1.6"/>
                     <path d="M21 15l-5-5L5 21"/>
                 </svg>
-                Advanced Image Mutation Tool<span class="version">v1.5</span>
+                Advanced Image Mutation Tool<span class="version">v1.6</span>
             </h1>
             <p>Continuous &amp; Discrete Controls</p>
             <div class="mode-bar">
@@ -1767,7 +1767,9 @@
                         <p class="slider-hint">Restricts the filter to one colour plane, as
                            <code>-channel R … +channel</code> does. Some operators write to
                            every plane whatever the mask says, and those are refused rather
-                           than silently widened.</p>
+                           than silently widened. <strong>Augment honours this too</strong>:
+                           with a channel chosen it runs only the configurations that support
+                           one and reports the rest as skipped.</p>
                     </div>
 
                     <div class="filter-group" style="margin-bottom: 15px;">
@@ -4233,13 +4235,25 @@
             const settings = readAugmentationSettings();
             // Every filter against every image, image-major so a partial run
             // still gives complete coverage of the images processed so far.
+            // Augmentation honours the Channel selection, as Apply does. With a
+            // channel chosen, 93 of the 173 configurations write to every plane
+            // whatever the mask says and refuse the request -- those are skipped
+            // and counted, not reported as failures, because the operator is
+            // being honest rather than the run going wrong.
+            const augChannel = (document.querySelector('input[name="channel-select"]:checked')
+                                || {}).value;
+            const useChannel = augChannel && augChannel !== 'all';
             const jobs = [];
             for (const file of files) {
                 for (const job of settings) {
-                    jobs.push({ file, mutation: job.mutation, params: job.params });
+                    const params = useChannel
+                        ? Object.assign({}, job.params, { channel: augChannel })
+                        : job.params;
+                    jobs.push({ file, mutation: job.mutation, params });
                 }
             }
             const total = jobs.length;
+            let skipped = 0;
             const slots = new Array(total);
             const failures = [];
             let done = 0;
@@ -4259,7 +4273,11 @@
                     try {
                         slots[i] = await mutateOne(job.file, job.mutation, job.params, '');
                     } catch (err) {
-                        failures.push(`${job.file.name} / ${job.mutation}: ${err.message}`);
+                        if (String(err.message).includes('does not honour a channel')) {
+                            skipped++;
+                        } else {
+                            failures.push(`${job.file.name} / ${job.mutation}: ${err.message}`);
+                        }
                     }
                     done++;
                     updateProgress(done, total, `${job.file.name} · ${job.mutation}`);
@@ -4288,7 +4306,9 @@
             } else if (failures.length === 0) {
                 showStatus(
                     `✓ Augmented ${subject} into ${allResults.length} variants ` +
-                    `(${settings.length} filters × ${files.length} image(s)) in ${took}`,
+                    `(${settings.length} filters × ${files.length} image(s)) in ${took}` +
+                    (skipped ? ` — ${skipped} skipped: those operators write to every ` +
+                               `channel whatever the mask says` : ''),
                     'success'
                 );
             } else {

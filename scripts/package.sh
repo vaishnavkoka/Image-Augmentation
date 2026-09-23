@@ -43,7 +43,7 @@ FILES=(requirements.txt)
 for f in *.py *.sh; do
     [ -e "$f" ] && FILES+=("$f")
 done
-DIRS=(src configs docs examples scripts tests bench assets)
+DIRS=(src configs docs examples scripts tests bench assets cli-version)
 
 for f in "${FILES[@]}"; do
     [ -e "$f" ] || { echo "ERROR: $f is missing — refusing to build an incomplete package."; exit 1; }
@@ -76,6 +76,9 @@ find "$DEST/scripts/rollback-versions" -name '*v1.1*' -delete 2>/dev/null || tru
 # Restore points are this machine's history, not part of the product, and they
 # are ~26 MB each -- they pushed the package from 34 MB to 60 MB.
 rm -rf "$DEST/scripts/restore-points" 2>/dev/null || true
+# Run logs are this machine's history, not part of the product.
+rm -rf "$DEST/cli-version/logs" 2>/dev/null || true
+mkdir -p "$DEST/cli-version/logs"
 
 # docs/ travels with src/ now, but the reports are 18 MB of PDFs and figures
 # and stay opt-in, as they were before they moved under docs/.

@@ -3,6 +3,48 @@
 All notable changes to this project are recorded here. Versions follow
 [semantic versioning](https://semver.org/).
 
+## [1.6.0] — 2026-09-23
+
+### Added
+- **Guided mode.** `./imt.py` with no arguments used to print an argparse usage
+  error, which helps nobody who does not already know the commands. It now asks
+  plain questions — which image or folder, one filter or all of them — lists
+  continuous filters (which take a value) separately from discrete ones, checks
+  each value against its range before sending it, and finishes by printing the
+  command that would have done the same thing. The first run is guided, the
+  second is typed, the third is in a script.
+- **`docs/USAGE.md`**: every command, option and default in one place, with the
+  three modes side by side and the error-code table. Linked from the README.
+- **Channel-aware augmentation.** The interface's Channel control was ignored by
+  Augment, so it looked like it applied and did not. Both the interface and
+  `augment --channel` now honour it: 80 of the 173 configurations support a
+  restriction and the other 93 are skipped and counted, because those operators
+  write to every plane whatever the mask says.
+- **Error codes.** Every failure carries one — `imt [E201]: no such mutation` —
+  with the first digit matching the exit code. `./imt.py codes` prints the table.
+- `tqdm` for progress, listed as optional: a built-in bar takes over when it is
+  absent, and the suite exercises **both** by blocking the import.
+- `tests/test_guided.py` (23 checks), taking the cli-version suites to five.
+
+### Fixed
+- `./imt.py list --json | head` printed a `BrokenPipeError` traceback. A reader
+  closing the pipe is not an error. Closing stdout to fix it traded that for a
+  `ValueError` at interpreter shutdown, so the handle is redirected instead.
+- `-q` silenced the log but not the command's own reporting, so `augment` still
+  printed its totals.
+- The venv's `pip` and nine other scripts carried shebangs pointing at
+  `backend/venv` from the restructure. A fresh `setup.sh` was never affected.
+
+### Notes
+- An earlier report said 97 of 173 configurations honour a channel restriction.
+  That was measured by probing each operator once and applying the answer to all
+  its configurations, which is wrong: `profile Strip` refuses while
+  `profile AdobeRGB1998` honours. Measured per configuration it is **80**.
+- A REPL was prototyped and discarded. Its case was speed, and the measurement
+  did not support it: a full `imt apply` is 198 ms, of which the catalogue fetch
+  a REPL would cache is 7 ms. What was actually missing was guidance, which is a
+  different thing and is what guided mode provides.
+
 ## [1.5.0] — 2026-09-23
 
 ### Added
@@ -162,6 +204,7 @@ First public release.
   slider positions, so a default augmentation run yields 148 distinct images.
 - `annotate` and `colorize` are reachable only through the API.
 
+[1.6.0]: https://github.com/vaishnavkoka/Image-Augmentation-tool/releases/tag/v1.6.0
 [1.5.0]: https://github.com/vaishnavkoka/Image-Augmentation-tool/releases/tag/v1.5.0
 [1.4.1]: https://github.com/vaishnavkoka/Image-Augmentation-tool/releases/tag/v1.4.1
 [1.4.0]: https://github.com/vaishnavkoka/Image-Augmentation-tool/releases/tag/v1.4.0

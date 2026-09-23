@@ -65,14 +65,19 @@ def main():
     check('health reports the engine', code == 0 and 'ImageMagick' in out)
 
     # --- the grid is the interface's grid, not a second one ----------------
-    imt = load(IMT, 'imt_mod')
+    # imt.py at the root is a launcher now; the implementation is in
+    # cli-version/imt/. Load the grid from where it actually lives.
+    sys.path.insert(0, os.path.join(ROOT, 'cli-version'))
+    from imt.grid import build as build_grid          # noqa: E402
+    from imt.client import Client                     # noqa: E402
     ag = load(os.path.join(HERE, 'augmentation_grid.py'), 'ag_mod')
     html = open(os.path.join(ROOT, 'src', 'ui', 'advanced-index.html')).read()
 
     def norm(jobs):
         return sorted((m, tuple(sorted((k, str(v)) for k, v in p.items()))) for m, p in jobs)
 
-    cli_grid = norm(imt.build_grid(BASE))
+    cat, _raw = Client(BASE).catalogue()
+    cli_grid = norm(build_grid(cat))
     ui_grid = norm(ag.build_jobs(html))
     check('the CLI grid is identical to the interface grid',
           cli_grid == ui_grid, f'{len(cli_grid)} vs {len(ui_grid)}')

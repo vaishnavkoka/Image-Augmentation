@@ -89,5 +89,10 @@ echo " 15. Command line — parity with the interface"
 echo "=============================================================="
 $PY cli.py || fail=1
 echo
+echo "=============================================================="
+echo " 16. cli-version — parity, modes, errors, logging"
+echo "=============================================================="
+bash "$HERE/../cli-version/tests/run.sh" || fail=1
+echo
 [ $fail -eq 0 ] && echo "ALL SUITES PASSED" || echo "SOME SUITES FAILED"
 exit $fail

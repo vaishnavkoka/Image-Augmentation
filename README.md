@@ -37,6 +37,9 @@ to cite either:
 
 ---
 
+> **New here?** [docs/USAGE.md](docs/USAGE.md) is the full reference — every
+> command, every option, every default, and the three modes side by side.
+
 ## What it does
 
 | | |
@@ -193,6 +196,13 @@ Everything the interface does, without a browser. `imt.py` talks to the same API
 so the catalogue, the validation, the worker isolation and the channel rules are
 the server's — there is no second copy to drift.
 
+Not sure of the flags? Run it with no arguments and it asks questions instead,
+then prints the command that would have done the same thing:
+
+```bash
+./imt.py                                            guided mode
+```
+
 ```bash
 ./imt.py health                                     what the engine can do
 ./imt.py list                                       the catalogue
@@ -304,6 +314,7 @@ Image-Augmentation-tool/
 ├── experiments/                downstream provenance-classifier experiment
 │
 ├── docs/
+│   ├── USAGE.md                every command, option and default
 │   ├── DOCUMENTATION.md        full reference
 │   └── screenshots/
 │
@@ -317,7 +328,7 @@ Created at runtime and not tracked: `outputs/`, `uploads/`, `src/backend/venv/`,
 
 | If you want to | Read |
 |---|---|
-| Use the tool | this README, then `docs/DOCUMENTATION.md` |
+| Use the tool | [docs/USAGE.md](docs/USAGE.md), then `docs/DOCUMENTATION.md` |
 | Know what an operator does | `GET /api/mutations`, or the operator table above |
 | Trust the output | `tests/oracle_differential.py`, then run `tests/run_all.sh` |
 | Change the engine | `src/backend/app.py`, then run `tests/run_all.sh` |
