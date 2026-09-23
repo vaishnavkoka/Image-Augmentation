@@ -199,6 +199,26 @@ def main():
             if e not in ('none', 'None', 'default'):
                 failures.append(f'{radio}: offers "{e}", which the backend would reject')
 
+    # Profile accounting, because it was miscounted once: `ls *.icc` misses
+    # the two files whose extension is uppercase .ICC, which made 49 profiles
+    # look like 46 against 50 offered options. Every option except Strip must
+    # resolve to a real file, case-insensitively.
+    icc_dir = os.path.join(HERE, '..', 'assets', 'icc')
+    if os.path.isdir(icc_dir):
+        on_disk = {f.rsplit('.', 1)[0].lower() for f in os.listdir(icc_dir)
+                   if f.lower().endswith(('.icc', '.icm'))}
+        offered = (catalogue.get('profile', {}).get('parameters', {})
+                   .get('profile', {}).get('options') or [])
+        orphans = [o for o in offered if o != 'Strip' and o.lower() not in on_disk]
+        print(f'  ICC profiles: {len(on_disk)} files, {len(offered)} options '
+              f'(1 Strip + {len(offered) - 1})')
+        if orphans:
+            failures.append(f'{len(orphans)} profile option(s) have no file in '
+                            f'assets/icc: {orphans[:5]}')
+        if len(offered) - 1 != len(on_disk):
+            notes.append(f'{len(on_disk)} profile files but {len(offered) - 1} '
+                         f'non-Strip options — the two should match')
+
     print()
     if notes:
         print(f'  {len(notes)} note(s), not failures:')

@@ -229,7 +229,7 @@ One source image through eight operators — see `examples/`:
 ## Repository organisation
 
 ```
-Image-Augmentation/
+Image-Augmentation-tool/
 ├── README.md                   this file
 ├── CHANGELOG.md                what changed in each version
 ├── CITATION.cff                how to cite the tool
