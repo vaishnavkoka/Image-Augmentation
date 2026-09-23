@@ -35,12 +35,14 @@ mkdir -p "$DEST"
 # --- what ships -------------------------------------------------------------
 # Everything needed to install and run, plus the validation suites, plus the
 # filter reference the documentation cites.
-FILES=(
-    doctor.py
-    run.sh
-    setup.sh
-    requirements.txt
-)
+# Every entry point at the root, not a hand-written list. The list named
+# doctor.py, run.sh and setup.sh, so imt.py -- the command line -- would have
+# shipped missing. That is the sixth defect of this exact shape in this
+# project: a second copy of a set that nothing keeps in step.
+FILES=(requirements.txt)
+for f in *.py *.sh; do
+    [ -e "$f" ] && FILES+=("$f")
+done
 DIRS=(src configs docs examples scripts tests bench assets)
 
 for f in "${FILES[@]}"; do

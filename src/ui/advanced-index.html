@@ -15,7 +15,7 @@
             }
         } catch (e) { /* no stored preference available; fall through to CSS */ }
     </script>
-    <title>Advanced Image Mutation Tool v1.4 &mdash; ImageMagick Filters</title>
+    <title>Advanced Image Mutation Tool v1.5 &mdash; ImageMagick Filters</title>
     <style>
         /* ============================================================
            THEME TOKENS
@@ -1664,7 +1664,7 @@
                     <circle cx="8.5" cy="8.5" r="1.6"/>
                     <path d="M21 15l-5-5L5 21"/>
                 </svg>
-                Advanced Image Mutation Tool<span class="version">v1.4</span>
+                Advanced Image Mutation Tool<span class="version">v1.5</span>
             </h1>
             <p>Continuous &amp; Discrete Controls</p>
             <div class="mode-bar">
@@ -4091,15 +4091,15 @@
             { mutation: 'colors',          slider: 'colorsSlider',         param: 'colors' },
             { mutation: 'edge',            slider: 'edgeSlider',           param: 'radius' },
             { mutation: 'emboss',          slider: 'embossSlider',         param: 'radius' },
-            { mutation: 'median',          slider: 'medianSlider',         param: 'kernel' },
+            { mutation: 'median',          slider: 'medianSlider',         param: 'kernel', augValue: 3 },
             { mutation: 'paint',           slider: 'paintSlider',          param: 'radius' },
             { mutation: 'posterize',       slider: 'posterizeSlider',      param: 'levels' },
             { mutation: 'raise',           slider: 'raiseSlider',          param: 'pixels' },
             { mutation: 'rotate',          slider: 'rotateSlider',         param: 'degrees' },
             { mutation: 'rotational_blur', slider: 'rotationalBlurSlider', param: 'angle' },
-            { mutation: 'gamma',           slider: 'gammaSlider',          param: 'gamma' },
+            { mutation: 'gamma',           slider: 'gammaSlider',          param: 'gamma', augValue: 1.8 },
             { mutation: 'implode',         slider: 'implodeSlider',        param: 'factor' },
-            { mutation: 'black_threshold', slider: 'blackThresholdSlider', param: 'percentage' },
+            { mutation: 'black_threshold', slider: 'blackThresholdSlider', param: 'percentage', augValue: 15 },
             { mutation: 'blur',            slider: 'blurSlider',           param: 'sigma' },
             { mutation: 'border',          slider: 'borderSlider',         param: 'pixels' },
             { mutation: 'chop',            slider: 'chopSlider',           param: 'value' },
@@ -4145,11 +4145,11 @@
             { mutation: 'liquid_rescale', slider: 'liquidRescaleSlider', param: 'percentage' },
             // These five had sliders and sensible defaults but were never in the
             // grid, so Augment skipped them while Apply Filter used them.
-            { mutation: 'brightness', slider: 'brightnessSlider', param: 'percentage' },
+            { mutation: 'brightness', slider: 'brightnessSlider', param: 'percentage', augValue: 25 },
             { mutation: 'charcoal', slider: 'charcoalSlider', param: 'radius' },
             { mutation: 'color_reduce', slider: 'colorReduceSlider', param: 'colors' },
-            { mutation: 'rotation', slider: 'rotationSlider', param: 'degrees' },
-            { mutation: 'saturation', slider: 'saturationSlider', param: 'percentage' },
+            { mutation: 'rotation', slider: 'rotationSlider', param: 'degrees', augValue: 15 },
+            { mutation: 'saturation', slider: 'saturationSlider', param: 'percentage', augValue: 50 },
             // These two carry sub-options. Augmentation emits one variant per
             // option (6 colorspaces + 3 grayscale methods), so the discrete
             // side contributes 16 configurations, not 9.
@@ -4176,9 +4176,19 @@
             for (const entry of AUGMENTATION_SET) {
                 if (entry.slider) {
                     const el = document.getElementById(entry.slider);
+                    // augValue: six filters default to a value that IS the
+                    // identity -- gamma 1.0, median kernel 1, rotation 0,
+                    // brightness/saturation/black_threshold 0 -- so augmenting
+                    // at the default returned six copies of the input. The
+                    // catalogue defaults are ImageMagick's own convention and
+                    // stay as they are; only the augmentation grid, whose job
+                    // is to produce variety, reaches for a working value.
+                    const value = (entry.augValue !== undefined)
+                        ? entry.augValue
+                        : (el ? parseFloat(el.value) : undefined);
                     jobs.push({
                         mutation: entry.mutation,
-                        params: el ? { [entry.param]: parseFloat(el.value) } : {}
+                        params: (value !== undefined) ? { [entry.param]: value } : {}
                     });
                 } else if (entry.radio) {
                     const options = [...document.querySelectorAll(`input[name="${entry.radio}"]`)];

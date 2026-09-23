@@ -3,6 +3,41 @@
 All notable changes to this project are recorded here. Versions follow
 [semantic versioning](https://semver.org/).
 
+## [1.5.0] — 2026-09-23
+
+### Added
+- **A command line, `imt.py`.** Everything the interface does without a
+  browser: `health`, `list`, `apply` (with `--set` and `--channel`), and
+  `augment` over an image or a folder. It talks to the same API, so the
+  catalogue, validation, worker isolation and channel rules are the server's.
+- `tests/cli.py`, the fifteenth suite: 15 checks including that CLI output is
+  pixel-identical to the API's, that refusals are clear, and that the grid it
+  builds matches the interface's exactly.
+
+### Fixed
+- **Six configurations returned the input unchanged.** `gamma` 1.0, `median`
+  kernel 1, `rotation` 0, and `brightness`/`saturation`/`black_threshold` at 0
+  are each their own identity, so augmenting at the catalogue default produced
+  copies of the input. The augmentation grid now uses a working value for those
+  six through a new `augValue`, while the catalogue defaults — which are
+  ImageMagick's own convention, verified against the command line — stay as they
+  are. On a sample photo this took the run from 157 changed to **163**.
+- `package.sh` named the root entry points explicitly, so `imt.py` would have
+  shipped missing. It globs them now. That was the sixth defect of this shape
+  in this project: a second copy of a set that nothing keeps in step.
+
+### Notes
+- **The identity count is image-dependent**, which is why it was first reported
+  as 8 and is in fact 10–17 depending on the input. `augmentation_grid.py` now
+  measures it across three different images and only flags configurations
+  identical on *all* of them.
+- Four remain unconditional on an sRGB source — `colorspace` sRGB and
+  Transparent, `profile` Strip and sRGB. These are not defects: on a CMYK input
+  the same four change the image by 20 to 35 levels.
+- Writing that measurement first produced "173 of 173 changed", which was
+  wrong: `io` was not imported, every comparison raised `NameError`, and a
+  blanket `except` swallowed it. The blanket catch is gone.
+
 ## [1.4.1] — 2026-09-22
 
 ### Added
@@ -127,6 +162,7 @@ First public release.
   slider positions, so a default augmentation run yields 148 distinct images.
 - `annotate` and `colorize` are reachable only through the API.
 
+[1.5.0]: https://github.com/vaishnavkoka/Image-Augmentation-tool/releases/tag/v1.5.0
 [1.4.1]: https://github.com/vaishnavkoka/Image-Augmentation-tool/releases/tag/v1.4.1
 [1.4.0]: https://github.com/vaishnavkoka/Image-Augmentation-tool/releases/tag/v1.4.0
 [1.3.0]: https://github.com/vaishnavkoka/Image-Augmentation-tool/releases/tag/v1.3.0

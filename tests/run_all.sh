@@ -84,5 +84,10 @@ echo " 14. Channel restriction — -channel, and refusing to fake it"
 echo "=============================================================="
 $PY channel_restriction.py || fail=1
 echo
+echo "=============================================================="
+echo " 15. Command line — parity with the interface"
+echo "=============================================================="
+$PY cli.py || fail=1
+echo
 [ $fail -eq 0 ] && echo "ALL SUITES PASSED" || echo "SOME SUITES FAILED"
 exit $fail

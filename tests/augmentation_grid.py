@@ -15,10 +15,12 @@ hiding: the grid is N configurations, of which a smaller number are distinct
 images at default settings.
 """
 import hashlib
+import io
 import json
 import os
 import re
 import subprocess
+import tempfile
 import sys
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
@@ -52,8 +54,15 @@ def build_jobs(html):
         slider, radio = attr(e, 'slider'), attr(e, 'radio')
         expand = 'expand' in e and 'true' in e
         if slider:
-            sm = re.search(r'<input[^>]*id="%s"[^>]*>' % re.escape(slider), html)
-            val = re.search(r'value="([^"]+)"', sm.group(0)).group(1) if sm else None
+            # augValue overrides the slider for augmentation only. Six filters
+            # default to their own identity, so without this the grid returned
+            # six copies of the input.
+            override = re.search(r'augValue:\s*([-\d.]+)', e)
+            if override:
+                val = override.group(1)
+            else:
+                sm = re.search(r'<input[^>]*id="%s"[^>]*>' % re.escape(slider), html)
+                val = re.search(r'value="([^"]+)"', sm.group(0)).group(1) if sm else None
             params = {}
             if param and val is not None:
                 params[param] = float(val) if '.' in val else int(val)
@@ -116,6 +125,74 @@ def main():
 
     with ThreadPoolExecutor(max_workers=8) as ex:
         res = list(ex.map(run, jobs))
+
+    # How many configurations return the input untouched? That count is
+    # image-dependent -- measured on one synthetic image it read 10, on a photo
+    # 16 -- so measuring it on a single input got it wrong. Several inputs, and
+    # only the configurations identical on ALL of them are unconditional.
+    import numpy as _np
+    from PIL import Image as _PILImage
+    probes = {'source': SRC}
+    _tmp = tempfile.mkdtemp(prefix='gridprobe-')
+    try:
+        _rng = _np.random.RandomState(7)
+        noise = os.path.join(_tmp, 'noise.png')
+        _PILImage.fromarray(_rng.randint(0, 256, (160, 160, 3), dtype=_np.uint8)).save(noise)
+        probes['noise'] = noise
+        flat = os.path.join(_tmp, 'flat.png')
+        _PILImage.fromarray((_np.full((160, 160, 3), 128)
+                             + _rng.randint(-10, 10, (160, 160, 3))).astype(_np.uint8)).save(flat)
+        probes['low contrast'] = flat
+
+        identical_sets = {}
+        for label, path in probes.items():
+            base = _np.asarray(_PILImage.open(path).convert('RGB'), _np.int32)
+
+            def one(job, _p=path, _b=base):
+                mut, params = job
+                body = subprocess.run(
+                    ['curl', '-s', '-m', '120', '-X', 'POST', BASE + '/api/mutate',
+                     '-F', 'image=@' + _p, '-F', 'mutation=' + mut,
+                     '-F', 'parameters=' + json.dumps(params)],
+                    capture_output=True, text=True).stdout
+                try:
+                    d = json.loads(body)
+                except ValueError:
+                    return None
+                if 'result_url' not in d:
+                    return None
+                blob = subprocess.run(['curl', '-s', d['result_url']], capture_output=True).stdout
+                # No blanket except here. Swallowing decode errors is exactly
+                # how this check first reported "everything changed": io was not
+                # imported, every call raised NameError, and the suite passed
+                # while measuring nothing.
+                arr = _np.asarray(_PILImage.open(io.BytesIO(blob)).convert('RGB'), _np.int32)
+                if arr.shape != _b.shape or int(_np.abs(arr - _b).max()) != 0:
+                    return None
+                return (mut, tuple(sorted(params.items())))
+
+            with ThreadPoolExecutor(max_workers=8) as ex2:
+                identical_sets[label] = {r for r in ex2.map(one, jobs) if r}
+            print(f'  {label:14}: {len(jobs) - len(identical_sets[label])} of {len(jobs)} '
+                  f'changed the image')
+
+        unconditional = set.intersection(*identical_sets.values())
+        print(f'  identical on every probe image: {len(unconditional)}')
+        for mut, params in sorted(unconditional):
+            print(f'      {mut} {dict(params)}')
+        # Only the sRGB-inherent ones may remain: colorspace sRGB/Transparent
+        # and profile Strip/sRGB do real work on a CMYK or profiled source.
+        SRGB_INHERENT = {('colorspace', (('colorspace', 'sRGB'),)),
+                         ('colorspace', (('colorspace', 'Transparent'),)),
+                         ('profile', (('profile', 'Strip'),)),
+                         ('profile', (('profile', 'sRGB'),))}
+        unexpected = unconditional - SRGB_INHERENT
+        if unexpected:
+            static.append(f'{len(unexpected)} configuration(s) return the input '
+                          f'unchanged on every image: {sorted(unexpected)[:4]}')
+    finally:
+        import shutil as _shutil
+        _shutil.rmtree(_tmp, ignore_errors=True)
 
     fails = [r for r in res if r[2]]
     hashes = [r[3] for r in res if r[3]]

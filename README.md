@@ -6,7 +6,7 @@
 [![Configurations](https://img.shields.io/badge/Configurations%20per%20image-173-364FC7?style=flat-square)](#what-it-does)
 [![CLI parity](https://img.shields.io/badge/Pixel--identical%20to%20CLI-68%2F69-2EA44F?style=flat-square)](#validation)
 [![Reproducible](https://img.shields.io/badge/Output-byte--reproducible-2EA44F?style=flat-square)](#what-it-does)
-[![Suites](https://img.shields.io/badge/Validation%20suites-14-9C36B5?style=flat-square)](#validation)
+[![Suites](https://img.shields.io/badge/Validation%20suites-15-9C36B5?style=flat-square)](#validation)
 [![Provenance](https://img.shields.io/badge/Provenance%20accuracy-100%25%20%E2%86%92%2050%25-C92A2A?style=flat-square)](#key-findings)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![ImageMagick](https://img.shields.io/badge/ImageMagick-7.1.1--41%20Q16--HDRI-EE7600?style=flat-square)](https://imagemagick.org/)
@@ -46,7 +46,7 @@ to cite either:
 | Verified against | the ImageMagick command line — **68 of 69 pixel-identical**, 1 within one quantum |
 | Output | byte-reproducible across runs |
 | Interface | three modes (Beginner, Intermediate, Advanced) |
-| Validation | **14 test suites**, one command |
+| Validation | **15 test suites**, one command |
 
 ## Operators
 
@@ -187,6 +187,27 @@ python3 doctor.py   # diagnose delegates, fonts, ports
 tests/run_all.sh    # all 13 validation suites
 ```
 
+## Using the command line
+
+Everything the interface does, without a browser. `imt.py` talks to the same API,
+so the catalogue, the validation, the worker isolation and the channel rules are
+the server's — there is no second copy to drift.
+
+```bash
+./imt.py health                                     what the engine can do
+./imt.py list                                       the catalogue
+./imt.py list -v --filter blur                      with parameters and ranges
+./imt.py apply photo.jpg blur --set sigma=5         one mutation
+./imt.py apply photo.jpg blur --set sigma=5 --channel red
+./imt.py apply photo.jpg morphology --set method=Dilate
+./imt.py augment photos/ -o out/                    the whole grid, every image
+./imt.py augment photo.jpg -o out/ --dry-run        list without running
+```
+
+`augment` reads the same `AUGMENTATION_SET` the interface uses, so the two
+produce byte-for-byte the same job list — `tests/cli.py` asserts exactly that.
+A folder of images gets one subdirectory per source.
+
 ## Using the API
 
 ```bash
@@ -322,6 +343,7 @@ Created at runtime and not tracked: `outputs/`, `uploads/`, `src/backend/venv/`,
 | `ui_behaviour` | theme, numeric entry, upload caps, in a real browser |
 | `build_matrix` | the catalogue on more than one ImageMagick, and that none crashes the server |
 | `channel_restriction` | `-channel` parity with the CLI, and that operators which ignore the mask are refused |
+| `cli` | the command line can do what the interface does, and builds the identical grid |
 
 ## Datasets
 
