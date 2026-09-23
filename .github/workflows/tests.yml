@@ -64,3 +64,29 @@ jobs:
 
       - name: Download routes and traversal refusal
         run: python tests/download_paths.py
+
+  cli-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install ImageMagick and its Python binding
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick libmagickwand-dev
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Start the backend in degraded mode
+        run: |
+          cp configs/.env.example src/backend/.env
+          cd src/backend && ALLOW_DEGRADED=1 python app.py &
+          for i in $(seq 1 40); do
+            curl -fsS -m 2 http://127.0.0.1:5000/api/health && break || sleep 2
+          done
+      - name: cli-version suites
+        run: bash cli-version/tests/run.sh
+
