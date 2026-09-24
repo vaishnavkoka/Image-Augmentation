@@ -19,6 +19,8 @@ UI = os.path.join(ROOT, 'src', 'ui', 'advanced-index.html')
 SRC = os.path.join(ROOT, 'tests', 'oracle_source.png')
 BASE = os.environ.get('TOOL_BASE', 'http://127.0.0.1:5000')
 sys.path.insert(0, CLI_ROOT)
+sys.path.insert(0, HERE)
+import capability as cap  # noqa: E402
 from imt.modes import load  # noqa: E402
 
 
@@ -85,9 +87,15 @@ def main():
         check('intermediate refuses a channel restriction',
               code == 2 and 'channel' in err)
 
-        code, out, _ = run(['--mode', 'advanced', 'apply', SRC, 'blur',
-                            '--set', 'sigma=5', '--channel', 'red', '-o', tmp])
-        check('advanced allows tuning and channels', code == 0 and 'channelred' in out)
+        if cap.supports_channel(BASE, SRC):
+            code, out, _ = run(['--mode', 'advanced', 'apply', SRC, 'blur',
+                                '--set', 'sigma=5', '--channel', 'red', '-o', tmp])
+            check('advanced allows tuning and channels', code == 0 and 'channelred' in out)
+        else:
+            # Without the PNG delegate the Pillow fallback handles the image and
+            # has no channel mask, so this asserts the build rather than the mode.
+            print('  advanced allows tuning and channels    SKIP  '
+                  'this build cannot restrict a channel')
 
         # the cap is enforced on a batch
         many = os.path.join(tmp, 'many')

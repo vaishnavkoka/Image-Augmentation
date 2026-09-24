@@ -5,6 +5,12 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$HERE"
 . "$HERE/../scripts/.venvpath.sh"
 PY="${PY:-$(resolve_venv "$HERE/..")/bin/python}"
+# CI installs the dependencies with the system Python and never builds a
+# virtualenv, so insisting on the venv path meant the suites did not run at all
+# -- the job failed before the first check. imt.sh already had this fallback;
+# the runners did not, which is one file disagreeing with another.
+[ -x "$PY" ] || PY="$(command -v python3)"
+[ -x "$PY" ] || { echo "No usable python found"; exit 1; }
 BASE="${TOOL_BASE:-http://localhost:5000}"
 export TOOL_API="$BASE/api/mutate" TOOL_BASE="$BASE"
 [ -f ../src/backend/.env ] && export MAGICK_HOME="$(grep -E '^\s*MAGICK_HOME=' ../src/backend/.env | tail -1 | cut -d= -f2- | tr -d '"'"'"' ')"

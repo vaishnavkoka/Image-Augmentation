@@ -230,13 +230,18 @@ def cmd_augment(a, client, log):
     say(f'  wrote {done} mutations to {a.out}'
         + (f', {skipped} skipped (no channel support)' if skipped else '')
         + (f', {failed} failed' if failed else ''))
+    # Record the outcome before deciding whether it counts as a failure. The
+    # record used to come after the PartialFailure was raised, so a run that
+    # half worked left nothing in the log -- which is precisely the run you go
+    # back to the log for.
+    logs.record('INFO', 'augment: %d written, %d skipped, %d failed from %d image(s)',
+                done, skipped, failed, len(sources))
     if failed:
         for p in problems[:5]:
             print(f'    {p}', file=sys.stderr)
         if len(problems) > 5:
             print(f'    … {len(problems) - 5} more, see the log', file=sys.stderr)
         raise PartialFailure(f'{failed} of {total} mutations failed')
-    logs.record('INFO', 'augment: %d mutations from %d image(s)', done, len(sources))
     return EXIT_OK
 
 

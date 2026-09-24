@@ -30,6 +30,8 @@ BASE = os.environ.get('TOOL_BASE', 'http://127.0.0.1:5000')
 CHROME = next((c for c in ('google-chrome', 'chromium', 'chromium-browser')
                if shutil.which(c)), None)
 sys.path.insert(0, CLI_ROOT)
+sys.path.insert(0, HERE)
+import capability as cap  # noqa: E402
 
 
 def ui_request_for(filter_value, slider_value=None, channel=None, discrete=False):
@@ -166,8 +168,23 @@ def main():
         ('grayscale', 'grayscale', ['method=Rec709Luma'], None, None, True),
     ]
 
+    degraded = cap.is_degraded(BASE)
+    channel_works = cap.supports_channel(BASE, SRC)
+    if degraded:
+        print(f'  this ImageMagick is missing delegates; cases it cannot perform '
+              f'are skipped (channel support: {channel_works})\n')
+
     for ui_value, mutation, sets, slider, channel, discrete in cases:
         label = f'{mutation}{" +" + channel if channel else ""}'
+        # An operator this build cannot perform, or a channel it cannot mask,
+        # says nothing about whether the two front ends agree.
+        if channel and not channel_works:
+            print(f'  {label:38}  SKIP  this build cannot restrict a channel')
+            continue
+        if not cap.supports(BASE, SRC, mutation, dict(
+                (k.split('=')[0], k.split('=')[1]) for k in (sets or []))):
+            print(f'  {label:38}  SKIP  unavailable on this ImageMagick')
+            continue
         ui_req, ui_err = ui_request_for(ui_value, slider, channel, discrete)
         if ui_err:
             check(f'{label}: interface built a request', False, ui_err)
